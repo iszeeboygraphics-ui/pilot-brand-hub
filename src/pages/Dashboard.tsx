@@ -1,16 +1,18 @@
 import { useBrandProfile } from '@/hooks/useBrandProfile';
 import { useAuth } from '@/hooks/useAuth';
 import { Progress } from '@/components/ui/progress';
-import { Palette, Layers, FileText, TrendingUp, CheckCircle2, Wand2, Image as ImageIcon } from 'lucide-react';
+import { Palette, Layers, FileText, TrendingUp, CheckCircle2, Wand2, Image as ImageIcon, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useState, useEffect } from 'react';
+import { BrandAssistant } from '@/components/BrandAssistant';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const { profile, completionScore, isLoading } = useBrandProfile();
   const navigate = useNavigate();
   const [activities, setActivities] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'overview' | 'assistant'>('overview');
 
   useEffect(() => {
     async function fetchActivities() {
@@ -43,32 +45,55 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">
-      <div className="animate-fade-in">
-        <h1 className="text-2xl font-bold tracking-tight">
-          Welcome back{profile?.brand_name ? `, ${profile.brand_name}` : ''}
-        </h1>
-        <p className="text-muted-foreground mt-1">Your brand command center</p>
+      <div className="animate-fade-in flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Welcome back{profile?.brand_name ? `, ${profile.brand_name}` : ''}
+          </h1>
+          <p className="text-muted-foreground mt-1">Your brand command center</p>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="flex items-center bg-muted/30 p-1 rounded-xl border border-border w-fit shrink-0">
+          <button 
+           onClick={() => setActiveTab('overview')} 
+           className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'overview' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            Overview
+          </button>
+          <button 
+           onClick={() => setActiveTab('assistant')} 
+           className={`px-4 py-2.5 text-sm rounded-lg font-medium transition-all flex items-center gap-2 ${activeTab === 'assistant' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            <Sparkles className={`w-4 h-4 ${activeTab === 'assistant' ? 'text-primary' : ''}`} />
+            Brand Assistant
+          </button>
+        </div>
       </div>
 
-      {/* Brand Consistency */}
-      <div className="card-neural p-6 animate-fade-in" style={{ animationDelay: '100ms' }}>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-primary" />
-            <h2 className="font-semibold">Brand Consistency</h2>
-          </div>
-          <span className="text-sm font-medium text-primary">{completionScore}%</span>
-        </div>
-        <Progress value={completionScore} className="h-2 mb-4" />
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-          {completionItems.map((item) => (
-            <div key={item.label} className="flex items-center gap-1.5 text-xs">
-              <CheckCircle2 className={`w-3.5 h-3.5 flex-shrink-0 ${item.done ? 'text-success' : 'text-muted-foreground/40'}`} />
-              <span className={item.done ? 'text-foreground' : 'text-muted-foreground'}>{item.label}</span>
+      {activeTab === 'assistant' ? (
+        <BrandAssistant />
+      ) : (
+        <>
+          {/* Brand Consistency */}
+          <div className="card-neural p-6 animate-fade-in" style={{ animationDelay: '100ms' }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-primary" />
+                <h2 className="font-semibold">Brand Consistency</h2>
+              </div>
+              <span className="text-sm font-medium text-primary">{completionScore}%</span>
             </div>
-          ))}
-        </div>
-      </div>
+            <Progress value={completionScore} className="h-2 mb-4" />
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              {completionItems.map((item) => (
+                <div key={item.label} className="flex items-center gap-1.5 text-xs">
+                  <CheckCircle2 className={`w-3.5 h-3.5 flex-shrink-0 ${item.done ? 'text-success' : 'text-muted-foreground/40'}`} />
+                  <span className={item.done ? 'text-foreground' : 'text-muted-foreground'}>{item.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -118,6 +143,8 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+        </>
+      )}
     </div>
   );
 }
