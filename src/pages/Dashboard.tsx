@@ -15,11 +15,11 @@ export default function Dashboard() {
   useEffect(() => {
     async function fetchActivities() {
       if (!user) return;
-      const { data } = await supabase
-        .from('generated_activities')
+      const { data } = await (supabase
+        .from('generated_activities' as any)
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(5);
+        .limit(5) as any);
       if (data) setActivities(data);
     }
     fetchActivities();
