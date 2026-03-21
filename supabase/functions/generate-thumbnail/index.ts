@@ -22,21 +22,23 @@ serve(async (req) => {
 
     const authHeader = req.headers.get('Authorization');
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     let profile = null;
     let userId = null;
     
-    if (authHeader && supabaseUrl && supabaseAnonKey && supabaseServiceKey) {
-      const authClient = createClient(supabaseUrl, supabaseAnonKey, {
-        global: { headers: { Authorization: authHeader } }
-      });
-      const { data: { user } } = await authClient.auth.getUser();
-      if (user) {
-        userId = user.id;
+    if (authHeader && supabaseUrl && supabaseServiceKey) {
+      try {
+        const token = authHeader.replace('Bearer ', '');
+        const payloadBase64 = token.split('.')[1];
+        const payload = JSON.parse(atob(payloadBase64));
+        userId = payload.sub;
+      } catch (e) {
+        console.error("JWT decode error:", e);
+      }
+      if (userId) {
         const adminClient = createClient(supabaseUrl, supabaseServiceKey);
-        const { data } = await adminClient.from('brand_profiles').select('*').eq('user_id', userId).single();
+        const { data } = await adminClient.from('brand_profiles').select('*').eq('user_id', userId).maybeSingle();
         profile = data;
       }
     }
