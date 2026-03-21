@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload, Download, Wand2, Image as ImageIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const presets = [
   { id: 'office', label: 'Minimalist Office', emoji: '🏢' },
@@ -10,11 +12,21 @@ const presets = [
   { id: 'studio', label: 'Studio Lighting', emoji: '💡' },
 ];
 
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function SceneCreator() {
   const [productImage, setProductImage] = useState<string | null>(null);
+  const [productFile, setProductFile] = useState<File | null>(null);
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
-  const [processed, setProcessed] = useState(false);
+  const [resultImage, setResultImage] = useState<string | null>(null);
 
   const handleUpload = () => {
     const input = document.createElement('input');
@@ -23,27 +35,52 @@ export default function SceneCreator() {
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
-        const url = URL.createObjectURL(file);
-        setProductImage(url);
-        setProcessed(false);
+        setProductImage(URL.createObjectURL(file));
+        setProductFile(file);
+        setResultImage(null);
       }
     };
     input.click();
   };
 
-  const handleProcess = () => {
+  const handleProcess = async () => {
+    if (!productFile || !selectedPreset) return;
     setProcessing(true);
-    setTimeout(() => {
+    setResultImage(null);
+
+    try {
+      const imageBase64 = await fileToBase64(productFile);
+
+      const { data, error } = await supabase.functions.invoke('scene-composite', {
+        body: { imageBase64, preset: selectedPreset },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setResultImage(data.image);
+      toast.success('Scene generated!');
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || 'Failed to generate scene');
+    } finally {
       setProcessing(false);
-      setProcessed(true);
-    }, 2500);
+    }
+  };
+
+  const handleDownload = () => {
+    if (!resultImage) return;
+    const a = document.createElement('a');
+    a.href = resultImage;
+    a.download = `scene-${selectedPreset}-${Date.now()}.png`;
+    a.click();
   };
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="animate-fade-in">
         <h1 className="text-2xl font-bold tracking-tight">Scene Creator</h1>
-        <p className="text-muted-foreground mt-1">Place your products in professional environments</p>
+        <p className="text-muted-foreground mt-1">Place your products in professional environments using AI</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -94,7 +131,7 @@ export default function SceneCreator() {
             className="w-full"
           >
             <Wand2 className="w-4 h-4 mr-2" />
-            {processing ? 'Processing...' : 'Process Image'}
+            {processing ? 'Generating scene…' : 'Process Image'}
           </Button>
         </div>
 
@@ -107,9 +144,9 @@ export default function SceneCreator() {
                 <div className="w-full h-full p-4 space-y-3">
                   <Skeleton className="w-full h-full rounded-lg" />
                 </div>
-              ) : processed && productImage ? (
+              ) : resultImage ? (
                 <div className="relative w-full h-full">
-                  <img src={productImage} alt="Processed" className="w-full h-full object-contain p-4" />
+                  <img src={resultImage} alt="Processed" className="w-full h-full object-contain p-4" />
                   <div className="absolute bottom-3 right-3 px-2 py-1 bg-success/20 text-success text-xs rounded-full font-medium">
                     {presets.find((p) => p.id === selectedPreset)?.label}
                   </div>
@@ -122,8 +159,8 @@ export default function SceneCreator() {
               )}
             </div>
 
-            {processed && (
-              <Button variant="outline" className="w-full">
+            {resultImage && (
+              <Button variant="outline" className="w-full" onClick={handleDownload}>
                 <Download className="w-4 h-4 mr-2" />
                 Download for Social
               </Button>

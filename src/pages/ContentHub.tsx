@@ -3,18 +3,7 @@ import { useBrandProfile } from '@/hooks/useBrandProfile';
 import { Button } from '@/components/ui/button';
 import { Upload, Sparkles, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
-
-const sampleCaption = `🔥 Stop scrolling — this changes everything.
-
-Ever wished your product could speak for itself? Now it does.
-
-Imagine having a brand presence that turns heads, sparks curiosity, and converts browsers into buyers. That's exactly what this is built for.
-
-✨ Premium quality. Bold design. Unforgettable impact.
-
-👉 Tap the link in bio to get yours before they're gone. Limited drop — once it's out, it's out.
-
-#BrandPilot #ContentCreator #SocialCommerce`;
+import { supabase } from '@/integrations/supabase/client';
 
 export default function ContentHub() {
   const { profile } = useBrandProfile();
@@ -43,12 +32,28 @@ export default function ContentHub() {
     input.click();
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     setGenerating(true);
-    setTimeout(() => {
-      setCaption(sampleCaption);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-caption', {
+        body: {
+          brandName: profile?.brand_name,
+          industry: profile?.industry,
+          brandVoice: profile?.brand_voice,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setCaption(data.caption);
+      toast.success('Caption generated!');
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || 'Failed to generate caption');
+    } finally {
       setGenerating(false);
-    }, 1800);
+    }
   };
 
   const handleCopy = () => {
@@ -96,7 +101,6 @@ export default function ContentHub() {
           <h3 className="font-semibold text-sm">The Flyer — 1080×1080</h3>
           <div className="aspect-square rounded-lg overflow-hidden relative" style={{ backgroundColor: brandColors[0] }}>
             <img src={productImage} alt="Product" className="w-full h-full object-contain p-6" />
-            {/* Brand overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-3 flex items-center justify-between" style={{ backgroundColor: brandColors[1] + 'dd' }}>
               <span className="text-xs font-bold text-white truncate">
                 {profile?.brand_name || 'Your Brand'}
@@ -118,7 +122,6 @@ export default function ContentHub() {
           <h3 className="font-semibold text-sm">The Story — 1080×1920</h3>
           <div className="aspect-[9/16] rounded-lg overflow-hidden relative" style={{ background: `linear-gradient(135deg, ${brandColors[0]}, ${brandColors[1]})` }}>
             <img src={productImage} alt="Product" className="w-full h-full object-contain p-6" />
-            {/* Engagement poll overlay */}
             <div className="absolute bottom-4 left-3 right-3 space-y-2">
               <p className="text-white text-xs font-semibold text-center drop-shadow">Would you rock this? 🔥</p>
               <div className="grid grid-cols-2 gap-2">
@@ -152,7 +155,7 @@ export default function ContentHub() {
             <div className="flex gap-2 mt-4">
               <Button onClick={handleGenerate} disabled={generating} size="sm" className="flex-1">
                 <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-                {generating ? 'Generating...' : 'Generate Caption'}
+                {generating ? 'Generating…' : 'Generate Caption'}
               </Button>
               {caption && (
                 <Button variant="outline" size="sm" onClick={handleCopy}>
