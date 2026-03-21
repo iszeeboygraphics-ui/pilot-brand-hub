@@ -22,20 +22,21 @@ serve(async (req) => {
 
     const authHeader = req.headers.get('Authorization');
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     let profile = null;
     let userId = null;
-    let supabaseClient = null;
     
-    if (authHeader && supabaseUrl && supabaseKey) {
-      supabaseClient = createClient(supabaseUrl, supabaseKey, {
+    if (authHeader && supabaseUrl && supabaseAnonKey && supabaseServiceKey) {
+      const authClient = createClient(supabaseUrl, supabaseAnonKey, {
         global: { headers: { Authorization: authHeader } }
       });
-      const { data: { user } } = await supabaseClient.auth.getUser();
+      const { data: { user } } = await authClient.auth.getUser();
       if (user) {
         userId = user.id;
-        const { data } = await supabaseClient.from('brand_profiles').select('*').eq('user_id', userId).single();
+        const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+        const { data } = await adminClient.from('brand_profiles').select('*').eq('user_id', userId).single();
         profile = data;
       }
     }
@@ -97,12 +98,14 @@ serve(async (req) => {
       throw new Error("No image was generated");
     }
 
-    if (supabaseClient && userId) {
-      await supabaseClient.from('generated_activities').insert({
+    if (supabaseUrl && supabaseServiceKey && userId) {
+      const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+      const { error } = await adminClient.from('generated_activities').insert({
         user_id: userId,
         activity_type: 'thumbnail',
         details: { imageUrl: generatedImage, title }
       });
+      if (error) console.error("DB Insert Error:", error);
     }
 
     return new Response(JSON.stringify({ image: generatedImage }), {
