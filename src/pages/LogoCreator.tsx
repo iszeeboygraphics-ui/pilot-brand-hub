@@ -5,6 +5,7 @@ import { Wand2, Download, Image as ImageIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { ImageResultEditor } from '@/components/ImageResultEditor';
 
 const styles = [
   { id: 'minimalist', label: 'Minimalist' },
@@ -20,14 +21,17 @@ export default function LogoCreator() {
   const [generating, setGenerating] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (refinementPrompt?: string) => {
     if (!brandName) {
       toast.error('Please enter a brand name');
       return;
     }
     
     setGenerating(true);
-    setLogoUrl(null);
+    // Only clear logoUrl if it's not a refinement
+    if (!refinementPrompt) {
+      setLogoUrl(null);
+    }
 
     try {
       const { data, error } = await supabase.functions.invoke('generate-logo', {
@@ -35,6 +39,7 @@ export default function LogoCreator() {
           brandName,
           style: selectedStyle,
           primaryColor: profile?.color_1 || null,
+          refinement: typeof refinementPrompt === 'string' ? refinementPrompt : undefined,
         },
       });
 
@@ -112,18 +117,17 @@ export default function LogoCreator() {
 
         {/* Right Panel: Preview */}
         <div className="card-neural p-6 flex flex-col items-center justify-center animate-fade-in min-h-[400px]" style={{ animationDelay: '200ms' }}>
-          {generating ? (
+          {generating && !logoUrl ? (
             <div className="w-full h-full flex items-center justify-center">
                <Skeleton className="w-64 h-64 rounded-full" />
             </div>
           ) : logoUrl ? (
-            <div className="flex flex-col items-center space-y-6">
-              <div className="w-64 h-64 rounded-xl overflow-hidden shadow-2xl border border-border bg-white flex items-center justify-center">
-                <img src={logoUrl} alt="Generated Logo" className="w-full h-full object-cover" />
-              </div>
-              <Button variant="outline" onClick={handleDownload}>
-                <Download className="w-4 h-4 mr-2" /> Download Logo
-              </Button>
+            <div className="w-full">
+               <ImageResultEditor 
+                 imageUrl={logoUrl} 
+                 onRefine={(prompt) => handleGenerate(prompt)} 
+                 isRefining={generating} 
+               />
             </div>
           ) : (
              <div className="text-center text-muted-foreground flex flex-col items-center">

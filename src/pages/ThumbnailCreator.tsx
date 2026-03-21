@@ -4,6 +4,7 @@ import { Upload, Wand2, Download, Image as ImageIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { ImageResultEditor } from '@/components/ImageResultEditor';
 
 export default function ThumbnailCreator() {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
@@ -29,20 +30,23 @@ export default function ThumbnailCreator() {
     input.click();
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (refinementPrompt?: string) => {
     if (!title) {
       toast.error('Please enter a thumbnail title');
       return;
     }
     
     setGenerating(true);
-    setThumbnailUrl(null);
+    if (!refinementPrompt) {
+      setThumbnailUrl(null);
+    }
 
     try {
       const { data, error } = await supabase.functions.invoke('generate-thumbnail', {
         body: {
           title,
           imageBase64: backgroundImage || null,
+          refinement: typeof refinementPrompt === 'string' ? refinementPrompt : undefined,
         },
       });
 
@@ -117,19 +121,18 @@ export default function ThumbnailCreator() {
         </div>
 
         {/* Right Panel: Preview */}
-        <div className="lg:col-span-3 card-neural p-6 flex flex-col items-center justify-center animate-fade-in bg-background/50 min-h-[400px]" style={{ animationDelay: '200ms' }}>
-          {generating ? (
+        <div className={`lg:col-span-3 flex flex-col items-center justify-center animate-fade-in min-h-[400px] ${!thumbnailUrl ? 'card-neural p-6 bg-background/50' : ''}`} style={{ animationDelay: '200ms' }}>
+          {generating && !thumbnailUrl ? (
             <div className="w-full h-full flex items-center justify-center">
                <Skeleton className="w-full aspect-video rounded-xl" />
             </div>
           ) : thumbnailUrl ? (
-            <div className="w-full space-y-6 flex flex-col items-center">
-              <div className="w-full aspect-video rounded-xl overflow-hidden shadow-2xl border border-border">
-                <img src={thumbnailUrl} alt="Generated Thumbnail" className="w-full h-full object-cover" />
-              </div>
-              <Button variant="outline" onClick={handleDownload}>
-                <Download className="w-4 h-4 mr-2" /> Download Full Res
-              </Button>
+            <div className="w-full">
+               <ImageResultEditor 
+                 imageUrl={thumbnailUrl} 
+                 onRefine={(prompt) => handleGenerate(prompt)} 
+                 isRefining={generating} 
+               />
             </div>
           ) : (
              <div className="text-center text-muted-foreground flex flex-col items-center">

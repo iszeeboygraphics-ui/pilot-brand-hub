@@ -4,6 +4,7 @@ import { Upload, Download, Wand2, Image as ImageIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { ImageResultEditor } from '@/components/ImageResultEditor';
 
 const presets = [
   { id: 'office', label: 'Minimalist Office', emoji: '🏢' },
@@ -47,16 +48,22 @@ export default function SceneCreator() {
     input.click();
   };
 
-  const handleProcess = async () => {
+  const handleProcess = async (refinementPrompt?: string) => {
     if (!productFile || !selectedPreset) return;
     setProcessing(true);
-    setResultImage(null);
+    if (!refinementPrompt) {
+      setResultImage(null);
+    }
 
     try {
       const imageBase64 = await fileToBase64(productFile);
 
       const { data, error } = await supabase.functions.invoke('scene-composite', {
-        body: { imageBase64, preset: selectedPreset },
+        body: { 
+          imageBase64, 
+          preset: selectedPreset,
+          refinement: typeof refinementPrompt === 'string' ? refinementPrompt : undefined,
+        },
       });
 
       if (error) throw error;
@@ -141,35 +148,34 @@ export default function SceneCreator() {
 
         {/* Right — Preview Canvas */}
         <div className="lg:col-span-3 animate-fade-in" style={{ animationDelay: '200ms' }}>
-          <div className="card-neural p-5 space-y-4">
-            <h3 className="font-semibold text-sm">Preview Canvas</h3>
-            <div className="aspect-[4/3] rounded-lg bg-background border border-border flex items-center justify-center overflow-hidden">
-              {processing ? (
-                <div className="w-full h-full p-4 space-y-3">
-                  <Skeleton className="w-full h-full rounded-lg" />
-                </div>
-              ) : resultImage ? (
-                <div className="relative w-full h-full">
-                  <img src={resultImage} alt="Processed" className="w-full h-full object-contain p-4" />
-                  <div className="absolute bottom-3 right-3 px-2 py-1 bg-success/20 text-success text-xs rounded-full font-medium">
-                    {presets.find((p) => p.id === selectedPreset)?.label}
-                  </div>
-                </div>
-              ) : (
+          {processing && !resultImage ? (
+            <div className="card-neural p-5 space-y-4">
+              <h3 className="font-semibold text-sm">Preview Canvas</h3>
+              <div className="aspect-[4/3] rounded-lg bg-background border border-border flex items-center justify-center overflow-hidden">
+                 <div className="w-full h-full p-4 space-y-3">
+                   <Skeleton className="w-full h-full rounded-lg" />
+                 </div>
+              </div>
+            </div>
+          ) : resultImage ? (
+            <div className="w-full">
+               <ImageResultEditor 
+                 imageUrl={resultImage} 
+                 onRefine={(prompt) => handleProcess(prompt)} 
+                 isRefining={processing} 
+               />
+            </div>
+          ) : (
+            <div className="card-neural p-5 space-y-4">
+              <h3 className="font-semibold text-sm">Preview Canvas</h3>
+              <div className="aspect-[4/3] rounded-lg bg-background border border-border flex items-center justify-center overflow-hidden">
                 <div className="text-center text-muted-foreground">
                   <ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-30" />
                   <p className="text-sm">Upload a product & select a preset</p>
                 </div>
-              )}
+              </div>
             </div>
-
-            {resultImage && (
-              <Button variant="outline" className="w-full" onClick={handleDownload}>
-                <Download className="w-4 h-4 mr-2" />
-                Download for Social
-              </Button>
-            )}
-          </div>
+          )}
         </div>
       </div>
     </div>

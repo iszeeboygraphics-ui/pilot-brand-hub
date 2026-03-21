@@ -10,7 +10,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { brandName: reqBrand, style, primaryColor: reqColor } = await req.json();
+    const { brandName: reqBrand, style, primaryColor: reqColor, refinement } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -56,7 +56,10 @@ serve(async (req) => {
     const styleInstruction = styleGuide[style] || styleGuide.modern;
     const colorInstruction = primaryColor ? `Use ${primaryColor} as the primary brand color.` : "";
 
-    const prompt = `Design a professional logo for a brand called "${brandName}". Style: ${styleInstruction} ${colorInstruction} The logo should be centered on a clean white background, suitable for use on websites, business cards, and social media. Vector-style, high contrast, crisp edges. No mockups, no text other than the brand name if it fits naturally.`;
+    let prompt = `Design a professional logo for a brand called "${brandName}". Style: ${styleInstruction} ${colorInstruction} The logo should be centered on a clean white background, suitable for use on websites, business cards, and social media. Vector-style, high contrast, crisp edges. No mockups, no text other than the brand name if it fits naturally.`;
+    if (refinement) {
+      prompt += ` \n\nUSER REFINEMENT INSTRUCTIONS: Please apply the following explicit adjustments to the design: ${refinement}`;
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

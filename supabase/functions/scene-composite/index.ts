@@ -17,7 +17,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { imageBase64, preset } = await req.json();
+    const { imageBase64, preset, refinement } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -53,6 +53,9 @@ serve(async (req) => {
     let prompt = presetPrompts[preset] || presetPrompts.studio;
     if (profile?.color_1) {
       prompt += ` Subtly incorporate the brand's primary color ${profile.color_1} into the lighting or background elements.`;
+    }
+    if (refinement) {
+      prompt += ` \n\nUSER REFINEMENT INSTRUCTIONS: Please apply the following explicit adjustments to the design: ${refinement}`;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
