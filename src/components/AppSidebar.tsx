@@ -1,4 +1,4 @@
-import { LayoutDashboard, Palette, Layers, FileText, Settings, LogOut, Zap } from 'lucide-react';
+import { LayoutDashboard, Palette, Layers, FileText, Settings, LogOut, Zap, Wand2, Image as ImageIcon } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,6 +19,8 @@ const navItems = [
   { title: 'Brand Vault', url: '/brand-vault', icon: Palette },
   { title: 'Scene Creator', url: '/scene-creator', icon: Layers },
   { title: 'Content Hub', url: '/content-hub', icon: FileText },
+  { title: 'Logo Creator', url: '/logo-creator', icon: Wand2 },
+  { title: 'Thumbnail Creator', url: '/thumbnail-creator', icon: ImageIcon },
   { title: 'Settings', url: '/settings', icon: Settings },
 ];
 

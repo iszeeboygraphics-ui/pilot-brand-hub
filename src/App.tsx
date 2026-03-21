@@ -11,6 +11,8 @@ import Dashboard from "./pages/Dashboard";
 import BrandVault from "./pages/BrandVault";
 import SceneCreator from "./pages/SceneCreator";
 import ContentHub from "./pages/ContentHub";
+import LogoCreator from "./pages/LogoCreator";
+import ThumbnailCreator from "./pages/ThumbnailCreator";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
@@ -44,6 +46,8 @@ const App = () => (
             <Route path="/brand-vault" element={<ProtectedRoute><BrandVault /></ProtectedRoute>} />
             <Route path="/scene-creator" element={<ProtectedRoute><SceneCreator /></ProtectedRoute>} />
             <Route path="/content-hub" element={<ProtectedRoute><ContentHub /></ProtectedRoute>} />
+            <Route path="/logo-creator" element={<ProtectedRoute><LogoCreator /></ProtectedRoute>} />
+            <Route path="/thumbnail-creator" element={<ProtectedRoute><ThumbnailCreator /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

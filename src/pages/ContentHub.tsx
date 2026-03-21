@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useBrandProfile } from '@/hooks/useBrandProfile';
 import { Button } from '@/components/ui/button';
-import { Upload, Sparkles, Copy, Check } from 'lucide-react';
+import { Upload, Sparkles, Copy, Check, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -153,10 +153,17 @@ export default function ContentHub() {
               </div>
             )}
             <div className="flex gap-2 mt-4">
-              <Button onClick={handleGenerate} disabled={generating} size="sm" className="flex-1">
-                <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-                {generating ? 'Generating…' : 'Generate Caption'}
-              </Button>
+              {!caption ? (
+                <Button onClick={handleGenerate} disabled={generating} size="sm" className="flex-1">
+                  <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                  {generating ? 'Generating…' : 'Generate Caption'}
+                </Button>
+              ) : (
+                <Button onClick={handleGenerate} disabled={generating} size="sm" className="flex-1">
+                  <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${generating ? 'animate-spin' : ''}`} />
+                  {generating ? 'Regenerating…' : 'Regenerate'}
+                </Button>
+              )}
               {caption && (
                 <Button variant="outline" size="sm" onClick={handleCopy}>
                   {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}

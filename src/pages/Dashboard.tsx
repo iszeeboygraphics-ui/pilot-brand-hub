@@ -1,7 +1,7 @@
 import { useBrandProfile } from '@/hooks/useBrandProfile';
 import { useAuth } from '@/hooks/useAuth';
 import { Progress } from '@/components/ui/progress';
-import { Palette, Layers, FileText, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { Palette, Layers, FileText, TrendingUp, CheckCircle2, Wand2, Image as ImageIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
@@ -13,6 +13,8 @@ export default function Dashboard() {
     { title: 'Brand Vault', desc: 'Configure your identity', icon: Palette, url: '/brand-vault', color: 'text-primary' },
     { title: 'Scene Creator', desc: 'Product environments', icon: Layers, url: '/scene-creator', color: 'text-success' },
     { title: 'Content Hub', desc: 'One-click remixes', icon: FileText, url: '/content-hub', color: 'text-accent' },
+    { title: 'Logo Creator', desc: 'Instant branding', icon: Wand2, url: '/logo-creator', color: 'text-purple-500' },
+    { title: 'Thumbnail Creator', desc: 'Eye-catching covers', icon: ImageIcon, url: '/thumbnail-creator', color: 'text-blue-500' },
   ];
 
   const completionItems = [

@@ -10,6 +10,10 @@ const presets = [
   { id: 'cafe', label: 'Luxury Café', emoji: '☕' },
   { id: 'street', label: 'Street Style', emoji: '🌆' },
   { id: 'studio', label: 'Studio Lighting', emoji: '💡' },
+  { id: 'beach', label: 'Beach', emoji: '🏖️' },
+  { id: 'kitchen', label: 'Kitchen', emoji: '🍳' },
+  { id: 'nature', label: 'Nature', emoji: '🌿' },
+  { id: 'holiday', label: 'Holiday', emoji: '🎄' },
 ];
 
 function fileToBase64(file: File): Promise<string> {
