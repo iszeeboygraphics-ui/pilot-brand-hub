@@ -108,7 +108,11 @@ export default function Dashboard() {
                     </p>
                  </div>
                  {act.activity_type === 'caption' && <div className="text-xs text-muted-foreground max-w-[200px] truncate">{act.details?.content}</div>}
-                 {act.details?.imageUrl && <img src={act.details.imageUrl} className="w-10 h-10 object-cover rounded shadow-sm border border-border" alt="Generated" />}
+                 {act.details?.imageUrl && (
+                   <a href={act.details.imageUrl} target="_blank" rel="noopener noreferrer" className="shrink-0 cursor-pointer hover:opacity-80 transition-opacity" title="Click to view full image">
+                     <img src={act.details.imageUrl} className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded shadow-sm border border-border" alt="Generated" />
+                   </a>
+                 )}
               </div>
             ))}
           </div>
