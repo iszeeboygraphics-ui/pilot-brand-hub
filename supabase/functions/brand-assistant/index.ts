@@ -78,6 +78,7 @@ Ensure you always apply the brand's voice and principles to everything you write
         model: "gpt-4o", 
         messages: aiMessages,
         temperature: 0.7,
+        stream: true, // Enable streaming
       }),
     });
 
@@ -85,58 +86,14 @@ Ensure you always apply the brand's voice and principles to everything you write
       throw new Error(`AI Gateway Text Error: ${chatResponse.status} ${await chatResponse.text()}`);
     }
 
-    const chatData = await chatResponse.json();
-    let assistantReply = chatData.choices?.[0]?.message?.content || "";
-    let generatedImageUrl = null;
-
-    const imageTagRegex = /\[GENERATE_IMAGE:\s*([^\]]+)\]/is;
-    const match = assistantReply.match(imageTagRegex);
-
-    if (match && match[1]) {
-      const imagePrompt = match[1].trim();
-      console.log("Image generation tag detected! Prompt:", imagePrompt);
-      
-      assistantReply = assistantReply.replace(imageTagRegex, "").trim();
-      
-      if (!assistantReply) assistantReply = "Here is the image you requested based on your brand principles:";
-
-      const imageResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-pro-image-preview",
-          messages: [{ role: "user", content: imagePrompt }],
-          modalities: ["image", "text"],
-        }),
-      });
-
-      if (imageResponse.ok) {
-         const imgData = await imageResponse.json();
-         generatedImageUrl = imgData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-      } else {
-         console.warn(`AI Gateway Image Error: ${imageResponse.status} ${await imageResponse.text()}`);
-         assistantReply += "\n\n*(Error: The image generation service failed to produce an image at this time).*";
-      }
-    }
-
-    if (supabaseUrl && supabaseServiceKey && userId) {
-      const adminClient = createClient(supabaseUrl, supabaseServiceKey);
-      await adminClient.from('generated_activities').insert({
-        user_id: userId,
-        activity_type: generatedImageUrl ? 'logo' : 'caption', 
-        details: { content: "Conversational Request", imageUrl: generatedImageUrl, isChat: true }
-      });
-    }
-
-    return new Response(JSON.stringify({ 
-      role: 'assistant', 
-      content: assistantReply,
-      imageUrl: generatedImageUrl 
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    // Proxy the stream back to the client
+    return new Response(chatResponse.body, {
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+      },
     });
 
   } catch (e) {

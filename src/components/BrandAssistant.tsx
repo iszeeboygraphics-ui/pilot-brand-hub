@@ -31,33 +31,107 @@ export function BrandAssistant() {
     const newMsg: Message = { role: 'user', content: input };
     const chatHistory = [...messages, newMsg];
     
-    setMessages(chatHistory);
+    setMessages([...chatHistory, { role: 'assistant', content: "" }]);
     setInput('');
     setIsLoading(true);
 
     try {
-      // Map history for API
       const apiMessages = chatHistory.map(m => ({ role: m.role, content: m.content }));
       
-      const { data, error } = await supabase.functions.invoke('brand-assistant', {
-        body: { messages: apiMessages },
+      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/brand-assistant`, {
+        method: 'POST',
         headers: {
-           Authorization: `Bearer ${session.access_token}`
-        }
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ messages: apiMessages })
       });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (!response.ok) throw new Error(`Network response was not ok: ${response.status}`);
+      if (!response.body) throw new Error("No readable stream");
 
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: data.content,
-        imageUrl: data.imageUrl
-      }]);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let assistantResponse = "";
+      let buffer = "";
+
+      // Turn off generic loading spinner since we are streaming live now
+      setIsLoading(false);
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        
+        buffer += decoder.decode(value, { stream: true });
+        let newlineIndex;
+        while ((newlineIndex = buffer.indexOf('\n\n')) >= 0) {
+           const message = buffer.slice(0, newlineIndex);
+           buffer = buffer.slice(newlineIndex + 2);
+           
+           if (message.startsWith('data: ')) {
+              const dataStr = message.slice(6);
+              if (dataStr === '[DONE]') continue;
+              
+              try {
+                 const data = JSON.parse(dataStr);
+                 const textChunk = data.choices?.[0]?.delta?.content || "";
+                 if (textChunk) {
+                    assistantResponse += textChunk;
+                    setMessages(prev => {
+                       const newMsgs = [...prev];
+                       newMsgs[newMsgs.length - 1].content = assistantResponse;
+                       return newMsgs;
+                    });
+                 }
+              } catch (e) {
+                 // Ignore partial json chunk errors
+              }
+           }
+        }
+      }
+
+      // STREAM COMPLETE. Check for image action tag.
+      const imageTagRegex = /\[GENERATE_IMAGE:\s*([^\]]+)\]/is;
+      const match = assistantResponse.match(imageTagRegex);
+
+      if (match && match[1]) {
+         const imagePrompt = match[1].trim();
+         const cleanedText = assistantResponse.replace(imageTagRegex, "").trim() || "Generating your image based on your brand principles...";
+         
+         setMessages(prev => {
+           const newMsgs = [...prev];
+           newMsgs[newMsgs.length - 1].content = cleanedText;
+           return newMsgs;
+         });
+
+         setIsLoading(true); // Restart loading for image generation
+         try {
+            const { data: imgData, error: imgError } = await supabase.functions.invoke('generate-assistant-image', {
+               body: { prompt: imagePrompt }
+            });
+            if (imgError) throw imgError;
+            
+            setMessages(prev => {
+              const newMsgs = [...prev];
+              newMsgs[newMsgs.length - 1].imageUrl = imgData?.imageUrl;
+              return newMsgs;
+            });
+         } catch (e) {
+            console.error("Assistant Image Error:", e);
+            toast.error("Failed to generate the image from the request.");
+         }
+      }
+
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Failed to generate response");
-      setMessages(prev => [...prev, { role: 'assistant', content: "Oops, something went wrong on my end. Please try again later."}]);
+      setMessages(prev => {
+        const newMsgs = [...prev];
+        if (!newMsgs[newMsgs.length-1].content) {
+          newMsgs[newMsgs.length-1].content = "Oops, something went wrong on my end. Please try again later.";
+        }
+        return newMsgs;
+      });
     } finally {
       setIsLoading(false);
     }
