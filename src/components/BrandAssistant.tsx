@@ -90,12 +90,15 @@ export function BrandAssistant() {
         }
       }
 
-      // STREAM COMPLETE. Check for image action tag.
+      // STREAM COMPLETE. Check for action tags.
       const imageTagRegex = /\[GENERATE_IMAGE:\s*([^\]]+)\]/is;
-      const match = assistantResponse.match(imageTagRegex);
+      const searchTagRegex = /\[SEARCH:\s*([^\]]+)\]/is;
+      
+      const imageMatch = assistantResponse.match(imageTagRegex);
+      const searchMatch = assistantResponse.match(searchTagRegex);
 
-      if (match && match[1]) {
-         const imagePrompt = match[1].trim();
+      if (imageMatch && imageMatch[1]) {
+         const imagePrompt = imageMatch[1].trim();
          const cleanedText = assistantResponse.replace(imageTagRegex, "").trim() || "Generating your image based on your brand principles...";
          
          setMessages(prev => {
@@ -119,6 +122,94 @@ export function BrandAssistant() {
          } catch (e) {
             console.error("Assistant Image Error:", e);
             toast.error("Failed to generate the image from the request.");
+         }
+      } else if (searchMatch && searchMatch[1]) {
+         const searchQuery = searchMatch[1].trim();
+         
+         setMessages(prev => {
+           const newMsgs = [...prev];
+           newMsgs[newMsgs.length - 1].content = `🔍 Searching the web for: "${searchQuery}"...`;
+           return newMsgs;
+         });
+
+         setIsLoading(true); 
+         try {
+            const { data: searchData, error: searchError } = await supabase.functions.invoke('web-search', {
+               body: { query: searchQuery }
+            });
+            if (searchError) throw searchError;
+            
+            const searchResults = searchData.results;
+            
+            // Re-trigger the stream with the search context
+            const invisibleSearchHistory = [
+               ...apiMessages, 
+               { role: 'assistant', content: `[SEARCH: ${searchQuery}]` },
+               { role: 'user', content: `SYSTEM MESSAGE - WEB SEARCH RESULTS for "${searchQuery}":\n${searchResults}\n\nPlease formulate your final helpful answer using these results.` }
+            ];
+
+            const response2 = await fetch(`${supabase.supabaseUrl}/functions/v1/brand-assistant`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${session.access_token}`
+              },
+              body: JSON.stringify({ messages: invisibleSearchHistory })
+            });
+
+            if (!response2.ok) throw new Error("Network error during search resolution");
+            if (!response2.body) throw new Error("No readable stream");
+
+            setMessages(prev => {
+               const newMsgs = [...prev];
+               newMsgs[newMsgs.length - 1].content = "";
+               return newMsgs;
+            });
+
+            const reader2 = response2.body.getReader();
+            const decoder2 = new TextDecoder();
+            let finalResponse = "";
+            let buffer2 = "";
+
+            setIsLoading(false);
+
+            while (true) {
+              const { value, done } = await reader2.read();
+              if (done) break;
+              
+              buffer2 += decoder2.decode(value, { stream: true });
+              let newlineIndex;
+              while ((newlineIndex = buffer2.indexOf('\n\n')) >= 0) {
+                 const message = buffer2.slice(0, newlineIndex);
+                 buffer2 = buffer2.slice(newlineIndex + 2);
+                 if (message.startsWith('data: ')) {
+                    const dataStr = message.slice(6);
+                    if (dataStr === '[DONE]') continue;
+                    try {
+                       const data = JSON.parse(dataStr);
+                       const textChunk = data.choices?.[0]?.delta?.content || "";
+                       if (textChunk) {
+                          finalResponse += textChunk;
+                          setMessages(prev => {
+                             const newMsgs = [...prev];
+                             newMsgs[newMsgs.length - 1].content = finalResponse;
+                             return newMsgs;
+                          });
+                       }
+                    } catch (e) { }
+                 }
+              }
+            }
+
+         } catch (e) {
+            console.error("Web Search Error:", e);
+            setMessages(prev => {
+               const newMsgs = [...prev];
+               newMsgs[newMsgs.length - 1].content = "*(Web search failed or was blocked. I cannot access real-time info right now).*";
+               return newMsgs;
+            });
+         } finally {
+            setIsLoading(false);
          }
       }
 
