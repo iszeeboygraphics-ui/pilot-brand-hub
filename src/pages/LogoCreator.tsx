@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Wand2, Download, Image as ImageIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const styles = [
   { id: 'minimalist', label: 'Minimalist' },
@@ -28,15 +29,30 @@ export default function LogoCreator() {
     setGenerating(true);
     setLogoUrl(null);
 
-    // Mocking generation delay
-    setTimeout(() => {
-      // Mock generated logo using Placehold.co with Brand Name and Primary Color
-      const color = profile?.color_1 ? profile.color_1.replace('#', '') : '8B5CF6';
-      const text = encodeURIComponent(brandName.substring(0, 2).toUpperCase());
-      setLogoUrl(`https://placehold.co/400x400/${color}/FFFFFF?text=${text}`);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-logo', {
+        body: {
+          brandName,
+          style: selectedStyle,
+          primaryColor: profile?.color_1 || null,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      if (data?.image) {
+        setLogoUrl(data.image);
+        toast.success('Logo generated successfully!');
+      } else {
+        throw new Error('No image returned');
+      }
+    } catch (e: any) {
+      console.error('Logo generation error:', e);
+      toast.error(e.message || 'Failed to generate logo');
+    } finally {
       setGenerating(false);
-      toast.success('Logo generated successfully!');
-    }, 2000);
+    }
   };
 
   const handleDownload = () => {
@@ -44,8 +60,6 @@ export default function LogoCreator() {
     const a = document.createElement('a');
     a.href = logoUrl;
     a.download = `logo-${brandName}-${Date.now()}.png`;
-    // For mocked external URL, direct download might not work as cleanly via a tag without fetch, 
-    // but we'll leave it as standard behavior for when the real endpoint returns a base64 or blob.
     a.target = '_blank';
     a.click();
   };
