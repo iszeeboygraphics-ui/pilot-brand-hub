@@ -229,7 +229,7 @@ export function BrandAssistant() {
   };
 
   return (
-    <div className="card-neural flex flex-col h-[650px] shadow-sm overflow-hidden animate-fade-in">
+    <div className="card-neural flex flex-col h-[calc(100vh-12rem)] min-h-[500px] md:h-[650px] shadow-sm overflow-hidden animate-fade-in">
       <div className="flex items-center gap-3 p-4 border-b border-border bg-muted/20 shrink-0">
         <Sparkles className="w-5 h-5 text-primary animate-pulse-glow" />
         <div>

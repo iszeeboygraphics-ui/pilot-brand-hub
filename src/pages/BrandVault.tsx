@@ -120,7 +120,7 @@ export default function BrandVault() {
       {/* Colors */}
       <div className="card-neural p-6 space-y-4 animate-fade-in" style={{ animationDelay: '200ms' }}>
         <h2 className="font-semibold">Visual Identity — Color Palette</h2>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {colors.map((color, i) => (
             <div key={i} className="space-y-2">
               <Label className="text-xs text-muted-foreground">Color {i + 1}</Label>
