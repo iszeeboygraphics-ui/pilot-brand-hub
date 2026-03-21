@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -26,7 +27,30 @@ serve(async (req) => {
       });
     }
 
-    const prompt = presetPrompts[preset] || presetPrompts.studio;
+    const authHeader = req.headers.get('Authorization');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
+    
+    let profile = null;
+    let userId = null;
+    let supabaseClient = null;
+    
+    if (authHeader && supabaseUrl && supabaseKey) {
+      supabaseClient = createClient(supabaseUrl, supabaseKey, {
+        global: { headers: { Authorization: authHeader } }
+      });
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (user) {
+        userId = user.id;
+        const { data } = await supabaseClient.from('brand_profiles').select('*').eq('user_id', userId).single();
+        profile = data;
+      }
+    }
+
+    let prompt = presetPrompts[preset] || presetPrompts.studio;
+    if (profile?.color_1) {
+      prompt += ` Subtly incorporate the brand's primary color ${profile.color_1} into the lighting or background elements.`;
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -71,6 +95,14 @@ serve(async (req) => {
 
     if (!generatedImage) {
       throw new Error("No image was generated");
+    }
+
+    if (supabaseClient && userId) {
+      await supabaseClient.from('generated_activities').insert({
+        user_id: userId,
+        activity_type: 'scene',
+        details: { imageUrl: generatedImage, preset }
+      });
     }
 
     return new Response(JSON.stringify({ image: generatedImage }), {

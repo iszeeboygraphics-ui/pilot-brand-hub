@@ -3,11 +3,27 @@ import { useAuth } from '@/hooks/useAuth';
 import { Progress } from '@/components/ui/progress';
 import { Palette, Layers, FileText, TrendingUp, CheckCircle2, Wand2, Image as ImageIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from 'react';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const { profile, completionScore, isLoading } = useBrandProfile();
   const navigate = useNavigate();
+  const [activities, setActivities] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function fetchActivities() {
+      if (!user) return;
+      const { data } = await supabase
+        .from('generated_activities')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(5);
+      if (data) setActivities(data);
+    }
+    fetchActivities();
+  }, [user]);
 
   const quickActions = [
     { title: 'Brand Vault', desc: 'Configure your identity', icon: Palette, url: '/brand-vault', color: 'text-primary' },
@@ -68,6 +84,35 @@ export default function Dashboard() {
             <p className="text-sm text-muted-foreground mt-1">{action.desc}</p>
           </button>
         ))}
+      </div>
+
+      {/* Recent Activities */}
+      <div className="card-neural p-6 animate-fade-in" style={{ animationDelay: '400ms' }}>
+        <h2 className="font-semibold mb-4">Recent Generations</h2>
+        {activities.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No recent activities found.</p>
+        ) : (
+          <div className="space-y-4">
+            {activities.map((act) => (
+              <div key={act.id} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-background/50">
+                 <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                    {act.activity_type === 'caption' && <FileText className="w-4 h-4" />}
+                    {act.activity_type === 'scene' && <Layers className="w-4 h-4" />}
+                    {act.activity_type === 'logo' && <Wand2 className="w-4 h-4" />}
+                    {act.activity_type === 'thumbnail' && <ImageIcon className="w-4 h-4" />}
+                 </div>
+                 <div className="flex-1">
+                    <p className="text-sm font-medium capitalize">{act.activity_type} Generated</p>
+                    <p className="text-xs text-muted-foreground">
+                       {new Date(act.created_at).toLocaleDateString()}
+                    </p>
+                 </div>
+                 {act.activity_type === 'caption' && <div className="text-xs text-muted-foreground max-w-[200px] truncate">{act.details?.content}</div>}
+                 {act.details?.imageUrl && <img src={act.details.imageUrl} className="w-10 h-10 object-cover rounded shadow-sm border border-border" alt="Generated" />}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

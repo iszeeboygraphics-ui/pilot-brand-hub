@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,9 +10,32 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { brandName, style, primaryColor } = await req.json();
+    const { brandName: reqBrand, style, primaryColor: reqColor } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    const authHeader = req.headers.get('Authorization');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
+    
+    let profile = null;
+    let userId = null;
+    let supabaseClient = null;
+    
+    if (authHeader && supabaseUrl && supabaseKey) {
+      supabaseClient = createClient(supabaseUrl, supabaseKey, {
+        global: { headers: { Authorization: authHeader } }
+      });
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (user) {
+        userId = user.id;
+        const { data } = await supabaseClient.from('brand_profiles').select('*').eq('user_id', userId).single();
+        profile = data;
+      }
+    }
+
+    const brandName = profile?.brand_name || reqBrand;
+    const primaryColor = profile?.color_1 || reqColor;
 
     if (!brandName) {
       return new Response(JSON.stringify({ error: "brandName is required" }), {
@@ -66,6 +90,14 @@ serve(async (req) => {
 
     if (!generatedImage) {
       throw new Error("No image was generated");
+    }
+
+    if (supabaseClient && userId) {
+      await supabaseClient.from('generated_activities').insert({
+        user_id: userId,
+        activity_type: 'logo',
+        details: { imageUrl: generatedImage, brandName, style }
+      });
     }
 
     return new Response(JSON.stringify({ image: generatedImage }), {

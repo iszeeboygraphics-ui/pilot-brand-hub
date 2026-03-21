@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,7 +20,31 @@ serve(async (req) => {
       });
     }
 
-    const prompt = `Create a bold, eye-catching YouTube/social media thumbnail (16:9 landscape ratio). The main headline text is: "${title}". Use large, impactful typography that is easy to read. The text should have strong contrast against the background with outlines or shadows for legibility. Make it vibrant, attention-grabbing, and professional. High energy composition with dynamic colors.`;
+    const authHeader = req.headers.get('Authorization');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
+    
+    let profile = null;
+    let userId = null;
+    let supabaseClient = null;
+    
+    if (authHeader && supabaseUrl && supabaseKey) {
+      supabaseClient = createClient(supabaseUrl, supabaseKey, {
+        global: { headers: { Authorization: authHeader } }
+      });
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (user) {
+        userId = user.id;
+        const { data } = await supabaseClient.from('brand_profiles').select('*').eq('user_id', userId).single();
+        profile = data;
+      }
+    }
+
+    let prompt = `Create a bold, eye-catching YouTube/social media thumbnail (16:9 landscape ratio). The main headline text is: "${title}". Use large, impactful typography that is easy to read. The text should have strong contrast against the background with outlines or shadows for legibility. Make it vibrant, attention-grabbing, and professional. High energy composition with dynamic colors.`;
+
+    if (profile?.color_1) {
+      prompt += ` Subtly incorporate the brand's primary color ${profile.color_1} into the design.`;
+    }
 
     const messages: any[] = [];
 
@@ -70,6 +95,14 @@ serve(async (req) => {
 
     if (!generatedImage) {
       throw new Error("No image was generated");
+    }
+
+    if (supabaseClient && userId) {
+      await supabaseClient.from('generated_activities').insert({
+        user_id: userId,
+        activity_type: 'thumbnail',
+        details: { imageUrl: generatedImage, title }
+      });
     }
 
     return new Response(JSON.stringify({ image: generatedImage }), {

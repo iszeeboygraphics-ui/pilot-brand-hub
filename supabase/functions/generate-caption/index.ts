@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,8 +10,33 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { brandName, industry, brandVoice } = await req.json();
+    const { brandName: reqBrand, industry: reqInd, brandVoice: reqVoice } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    const authHeader = req.headers.get('Authorization');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
+    
+    let profile = null;
+    let userId = null;
+    let supabaseClient = null;
+    
+    if (authHeader && supabaseUrl && supabaseKey) {
+      supabaseClient = createClient(supabaseUrl, supabaseKey, {
+        global: { headers: { Authorization: authHeader } }
+      });
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (user) {
+        userId = user.id;
+        const { data } = await supabaseClient.from('brand_profiles').select('*').eq('user_id', userId).single();
+        profile = data;
+      }
+    }
+    
+    const brandName = profile?.brand_name || reqBrand;
+    const industry = profile?.industry || reqInd;
+    const brandVoice = profile?.brand_voice || reqVoice;
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const voiceGuide: Record<string, string> = {
@@ -62,6 +88,14 @@ Output ONLY the caption text — no labels, no markdown, no explanations. Includ
 
     const data = await response.json();
     const caption = data.choices?.[0]?.message?.content;
+
+    if (supabaseClient && userId && caption) {
+      await supabaseClient.from('generated_activities').insert({
+        user_id: userId,
+        activity_type: 'caption',
+        details: { content: caption }
+      });
+    }
 
     return new Response(JSON.stringify({ caption }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
