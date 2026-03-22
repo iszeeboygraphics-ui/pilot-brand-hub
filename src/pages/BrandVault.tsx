@@ -6,8 +6,39 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, Save, Palette, X } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Upload, Save, Palette, X, Check, ChevronsUpDown } from 'lucide-react';
 import { toast } from 'sonner';
+
+const INDUSTRIES = [
+  'Advertising & Marketing', 'Agriculture', 'Architecture & Design', 'Automotive',
+  'Beauty & Cosmetics', 'Biotechnology', 'Blockchain & Web3', 'Construction',
+  'Consulting', 'E-Commerce', 'Education & EdTech', 'Energy & Utilities',
+  'Entertainment & Media', 'Fashion & Apparel', 'Finance & Banking', 'Fitness & Wellness',
+  'Food & Beverage', 'Gaming', 'Government & Public Sector', 'Healthcare & Medical',
+  'Hospitality & Tourism', 'Insurance', 'Interior Design', 'Legal Services',
+  'Logistics & Supply Chain', 'Manufacturing', 'Music & Audio', 'Non-Profit & NGO',
+  'Pets & Animals', 'Pharmaceuticals', 'Photography & Videography', 'Real Estate',
+  'Retail', 'SaaS & Software', 'Sports', 'Sustainability & CleanTech',
+  'Telecommunications', 'Transportation', 'Travel & Aviation', 'Venture Capital & Startups',
+];
+
+const BRAND_VOICES = [
+  { value: 'luxury', label: 'Luxury', desc: 'Refined, exclusive, aspirational' },
+  { value: 'bold', label: 'Bold', desc: 'Confident, daring, impactful' },
+  { value: 'minimalist', label: 'Minimalist', desc: 'Clean, simple, understated' },
+  { value: 'friendly', label: 'Friendly', desc: 'Warm, approachable, conversational' },
+  { value: 'professional', label: 'Professional', desc: 'Polished, authoritative, trustworthy' },
+  { value: 'playful', label: 'Playful', desc: 'Fun, witty, lighthearted' },
+  { value: 'edgy', label: 'Edgy', desc: 'Provocative, rebellious, unconventional' },
+  { value: 'inspirational', label: 'Inspirational', desc: 'Uplifting, motivational, empowering' },
+  { value: 'technical', label: 'Technical', desc: 'Precise, data-driven, expert' },
+  { value: 'storytelling', label: 'Storytelling', desc: 'Narrative, emotional, immersive' },
+  { value: 'casual', label: 'Casual', desc: 'Relaxed, informal, down-to-earth' },
+  { value: 'corporate', label: 'Corporate', desc: 'Formal, structured, institutional' },
+];
 
 export default function BrandVault() {
   const { user } = useAuth();
