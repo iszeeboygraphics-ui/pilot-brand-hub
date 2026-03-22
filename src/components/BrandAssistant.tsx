@@ -38,7 +38,7 @@ export function BrandAssistant() {
     try {
       const apiMessages = chatHistory.map(m => ({ role: m.role, content: m.content }));
       
-      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/brand-assistant`, {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/brand-assistant`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
