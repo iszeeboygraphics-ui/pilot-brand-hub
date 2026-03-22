@@ -129,7 +129,36 @@ export default function BrandVault() {
           </div>
           <div className="space-y-2">
             <Label>Industry</Label>
-            <Input value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder="Fashion, Tech, Food..." className="bg-background" />
+            <Popover open={industryOpen} onOpenChange={setIndustryOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" role="combobox" aria-expanded={industryOpen} className="w-full justify-between bg-background font-normal">
+                  {industry || 'Select industry...'}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search industries..." />
+                  <CommandList>
+                    <CommandEmpty>No industry found.</CommandEmpty>
+                    <CommandGroup>
+                      <ScrollArea className="h-56">
+                        {INDUSTRIES.map((ind) => (
+                          <CommandItem
+                            key={ind}
+                            value={ind}
+                            onSelect={(val) => { setIndustry(val); setIndustryOpen(false); }}
+                          >
+                            <Check className={`mr-2 h-4 w-4 ${industry === ind ? 'opacity-100' : 'opacity-0'}`} />
+                            {ind}
+                          </CommandItem>
+                        ))}
+                      </ScrollArea>
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
@@ -140,10 +169,12 @@ export default function BrandVault() {
               <SelectValue placeholder="Select voice" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="luxury">Luxury</SelectItem>
-              <SelectItem value="bold">Bold</SelectItem>
-              <SelectItem value="minimalist">Minimalist</SelectItem>
-              <SelectItem value="friendly">Friendly</SelectItem>
+              {BRAND_VOICES.map((v) => (
+                <SelectItem key={v.value} value={v.value}>
+                  <span className="font-medium">{v.label}</span>
+                  <span className="ml-2 text-xs text-muted-foreground">{v.desc}</span>
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
