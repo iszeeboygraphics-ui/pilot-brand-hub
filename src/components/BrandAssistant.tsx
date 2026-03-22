@@ -148,7 +148,7 @@ export function BrandAssistant() {
                { role: 'user', content: `SYSTEM MESSAGE - WEB SEARCH RESULTS for "${searchQuery}":\n${searchResults}\n\nPlease formulate your final helpful answer using these results.` }
             ];
 
-            const response2 = await fetch(`${supabase.supabaseUrl}/functions/v1/brand-assistant`, {
+            const response2 = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/brand-assistant`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

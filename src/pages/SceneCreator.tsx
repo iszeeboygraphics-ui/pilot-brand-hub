@@ -137,7 +137,7 @@ export default function SceneCreator() {
           </div>
 
           <Button
-            onClick={handleProcess}
+            onClick={() => handleProcess()}
             disabled={!productImage || !selectedPreset || processing}
             className="w-full"
           >
