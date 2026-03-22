@@ -114,7 +114,7 @@ export default function ThumbnailCreator() {
             />
           </div>
 
-          <Button onClick={handleGenerate} disabled={generating || !title} className="w-full h-12">
+          <Button onClick={() => handleGenerate()} disabled={generating || !title} className="w-full h-12">
             <Wand2 className={`w-4 h-4 mr-2 ${generating ? 'animate-spin' : ''}`} />
             {generating ? 'Generating thumbnail...' : 'Generate Thumbnail'}
           </Button>

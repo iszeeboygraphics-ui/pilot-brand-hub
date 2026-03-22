@@ -109,7 +109,7 @@ export default function LogoCreator() {
             </div>
           </div>
 
-          <Button onClick={handleGenerate} disabled={generating || !brandName} className="w-full h-12">
+          <Button onClick={() => handleGenerate()} disabled={generating || !brandName} className="w-full h-12">
             <Wand2 className={`w-4 h-4 mr-2 ${generating ? 'animate-spin' : ''}`} />
             {generating ? 'Designing logo...' : 'Generate Logo'}
           </Button>

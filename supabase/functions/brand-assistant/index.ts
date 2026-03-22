@@ -83,7 +83,7 @@ Ensure you always apply the brand's voice and principles to everything you write
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o", 
+        model: "google/gemini-3-flash-preview", 
         messages: aiMessages,
         temperature: 0.7,
         stream: true, // Enable streaming
