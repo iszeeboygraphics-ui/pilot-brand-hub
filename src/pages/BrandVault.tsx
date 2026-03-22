@@ -6,8 +6,39 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, Save, Palette, X } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Upload, Save, Palette, X, Check, ChevronsUpDown } from 'lucide-react';
 import { toast } from 'sonner';
+
+const INDUSTRIES = [
+  'Advertising & Marketing', 'Agriculture', 'Architecture & Design', 'Automotive',
+  'Beauty & Cosmetics', 'Biotechnology', 'Blockchain & Web3', 'Construction',
+  'Consulting', 'E-Commerce', 'Education & EdTech', 'Energy & Utilities',
+  'Entertainment & Media', 'Fashion & Apparel', 'Finance & Banking', 'Fitness & Wellness',
+  'Food & Beverage', 'Gaming', 'Government & Public Sector', 'Healthcare & Medical',
+  'Hospitality & Tourism', 'Insurance', 'Interior Design', 'Legal Services',
+  'Logistics & Supply Chain', 'Manufacturing', 'Music & Audio', 'Non-Profit & NGO',
+  'Pets & Animals', 'Pharmaceuticals', 'Photography & Videography', 'Real Estate',
+  'Retail', 'SaaS & Software', 'Sports', 'Sustainability & CleanTech',
+  'Telecommunications', 'Transportation', 'Travel & Aviation', 'Venture Capital & Startups',
+];
+
+const BRAND_VOICES = [
+  { value: 'luxury', label: 'Luxury', desc: 'Refined, exclusive, aspirational' },
+  { value: 'bold', label: 'Bold', desc: 'Confident, daring, impactful' },
+  { value: 'minimalist', label: 'Minimalist', desc: 'Clean, simple, understated' },
+  { value: 'friendly', label: 'Friendly', desc: 'Warm, approachable, conversational' },
+  { value: 'professional', label: 'Professional', desc: 'Polished, authoritative, trustworthy' },
+  { value: 'playful', label: 'Playful', desc: 'Fun, witty, lighthearted' },
+  { value: 'edgy', label: 'Edgy', desc: 'Provocative, rebellious, unconventional' },
+  { value: 'inspirational', label: 'Inspirational', desc: 'Uplifting, motivational, empowering' },
+  { value: 'technical', label: 'Technical', desc: 'Precise, data-driven, expert' },
+  { value: 'storytelling', label: 'Storytelling', desc: 'Narrative, emotional, immersive' },
+  { value: 'casual', label: 'Casual', desc: 'Relaxed, informal, down-to-earth' },
+  { value: 'corporate', label: 'Corporate', desc: 'Formal, structured, institutional' },
+];
 
 export default function BrandVault() {
   const { user } = useAuth();
@@ -20,6 +51,7 @@ export default function BrandVault() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [industryOpen, setIndustryOpen] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -97,7 +129,36 @@ export default function BrandVault() {
           </div>
           <div className="space-y-2">
             <Label>Industry</Label>
-            <Input value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder="Fashion, Tech, Food..." className="bg-background" />
+            <Popover open={industryOpen} onOpenChange={setIndustryOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" role="combobox" aria-expanded={industryOpen} className="w-full justify-between bg-background font-normal">
+                  {industry || 'Select industry...'}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search industries..." />
+                  <CommandList>
+                    <CommandEmpty>No industry found.</CommandEmpty>
+                    <CommandGroup>
+                      <ScrollArea className="h-56">
+                        {INDUSTRIES.map((ind) => (
+                          <CommandItem
+                            key={ind}
+                            value={ind}
+                            onSelect={(val) => { setIndustry(val); setIndustryOpen(false); }}
+                          >
+                            <Check className={`mr-2 h-4 w-4 ${industry === ind ? 'opacity-100' : 'opacity-0'}`} />
+                            {ind}
+                          </CommandItem>
+                        ))}
+                      </ScrollArea>
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
@@ -108,10 +169,12 @@ export default function BrandVault() {
               <SelectValue placeholder="Select voice" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="luxury">Luxury</SelectItem>
-              <SelectItem value="bold">Bold</SelectItem>
-              <SelectItem value="minimalist">Minimalist</SelectItem>
-              <SelectItem value="friendly">Friendly</SelectItem>
+              {BRAND_VOICES.map((v) => (
+                <SelectItem key={v.value} value={v.value}>
+                  <span className="font-medium">{v.label}</span>
+                  <span className="ml-2 text-xs text-muted-foreground">{v.desc}</span>
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
