@@ -11,10 +11,18 @@ const presets = [
   { id: 'cafe', label: 'Luxury Café', emoji: '☕' },
   { id: 'street', label: 'Street Style', emoji: '🌆' },
   { id: 'studio', label: 'Studio Lighting', emoji: '💡' },
-  { id: 'beach', label: 'Beach', emoji: '🏖️' },
-  { id: 'kitchen', label: 'Kitchen', emoji: '🍳' },
-  { id: 'nature', label: 'Nature', emoji: '🌿' },
-  { id: 'holiday', label: 'Holiday', emoji: '🎄' },
+  { id: 'beach', label: 'Beach Vibes', emoji: '🏖️' },
+  { id: 'kitchen', label: 'Kitchen Counter', emoji: '🍳' },
+  { id: 'nature', label: 'Nature Trail', emoji: '🌿' },
+  { id: 'holiday', label: 'Holiday Display', emoji: '🎄' },
+  { id: 'gym', label: 'Gym & Fitness', emoji: '🏋️' },
+  { id: 'rooftop', label: 'Rooftop Terrace', emoji: '🌇' },
+  { id: 'library', label: 'Cozy Library', emoji: '📚' },
+  { id: 'marble', label: 'Marble Surface', emoji: '🪨' },
+  { id: 'neon', label: 'Neon Night', emoji: '🌃' },
+  { id: 'garden', label: 'Botanical Garden', emoji: '🌺' },
+  { id: 'workspace', label: 'Creative Workspace', emoji: '🎨' },
+  { id: 'runway', label: 'Fashion Runway', emoji: '👗' },
 ];
 
 function fileToBase64(file: File): Promise<string> {
