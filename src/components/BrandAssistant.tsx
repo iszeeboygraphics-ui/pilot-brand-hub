@@ -15,7 +15,7 @@ interface Message {
 export function BrandAssistant() {
   const { session } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: "Hello! I'm your personalized Brand Assistant. Ask me anything, tell me to write a post, or ask me to generate a graphic for your brand!" }
+    { role: 'assistant', content: "Hello! I'm your AI Assistant. Ask me anything, search the web, have a conversation, or tell me to generate a graphic!" }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -233,8 +233,8 @@ export function BrandAssistant() {
       <div className="flex items-center gap-3 p-4 border-b border-border bg-muted/20 shrink-0">
         <Sparkles className="w-5 h-5 text-primary animate-pulse-glow" />
         <div>
-          <h2 className="font-semibold">Brand Assistant</h2>
-          <p className="text-xs text-muted-foreground leading-tight mt-0.5">Always on-brand intelligence</p>
+          <h2 className="font-semibold">AI Assistant</h2>
+          <p className="text-xs text-muted-foreground leading-tight mt-0.5">General-purpose AI with brand intelligence</p>
         </div>
       </div>
 
@@ -291,7 +291,7 @@ export function BrandAssistant() {
            <Input 
              value={input} 
              onChange={e => setInput(e.target.value)}
-             placeholder="Ask a question, write a prompt, or request an image..."
+             placeholder="Ask a factual question, search the web, prompt an image, or just chat..."
              className="h-12 input-neural shadow-sm rounded-full px-5"
              disabled={isLoading}
            />
