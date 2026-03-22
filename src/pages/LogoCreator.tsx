@@ -12,6 +12,14 @@ const styles = [
   { id: 'modern', label: 'Modern' },
   { id: 'vintage', label: 'Vintage' },
   { id: 'playful', label: 'Playful' },
+  { id: 'geometric', label: 'Geometric' },
+  { id: 'hand-drawn', label: 'Hand-Drawn' },
+  { id: 'luxury', label: 'Luxury' },
+  { id: 'tech', label: 'Tech' },
+  { id: 'organic', label: 'Organic' },
+  { id: 'retro', label: 'Retro' },
+  { id: 'bold', label: 'Bold' },
+  { id: 'elegant', label: 'Elegant' },
 ];
 
 export default function LogoCreator() {
