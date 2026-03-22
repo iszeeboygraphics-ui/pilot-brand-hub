@@ -51,6 +51,7 @@ export default function BrandVault() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [industryOpen, setIndustryOpen] = useState(false);
 
   useEffect(() => {
     if (profile) {
