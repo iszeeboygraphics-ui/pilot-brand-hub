@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useState, useEffect } from 'react';
 import { BrandAssistant } from '@/components/BrandAssistant';
+import { FeatureIntro } from '@/components/FeatureIntro';
 
 export default function Dashboard() {
   const { user } = useAuth();
