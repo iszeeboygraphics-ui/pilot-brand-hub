@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { ImageResultEditor } from '@/components/ImageResultEditor';
+import { FeatureIntro } from '@/components/FeatureIntro';
 
 const styles = [
   { id: 'minimalist', label: 'Minimalist' },
@@ -83,6 +84,18 @@ export default function LogoCreator() {
         <h1 className="text-2xl font-bold tracking-tight">Logo Creator</h1>
         <p className="text-muted-foreground mt-1">Generate a unique logo for your brand instantly</p>
       </div>
+
+      <FeatureIntro
+        featureKey="logo-creator"
+        title="How Logo Creator Works"
+        description="Enter your brand name, pick a style, and AI will generate a professional logo using your brand colors. Refine it until it's perfect."
+        tips={[
+          "Choose from 12 styles: Minimalist, Luxury, Geometric, Hand-Drawn, and more",
+          "Your primary brand color from Brand Vault is used automatically",
+          "Use the refine feature to tweak colors, layout, or style after generation",
+          "Download your logo and upload it back to Brand Vault as your master logo",
+        ]}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Left Panel: Settings */}

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Upload, Sparkles, Copy, Check, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { FeatureIntro } from '@/components/FeatureIntro';
 
 export default function ContentHub() {
   const { profile } = useBrandProfile();
@@ -72,6 +73,19 @@ export default function ContentHub() {
           <h1 className="text-2xl font-bold tracking-tight">Content Hub</h1>
           <p className="text-muted-foreground mt-1">One-click product-to-story remix</p>
         </div>
+
+        <FeatureIntro
+          featureKey="content-hub"
+          title="What is the Content Hub?"
+          description="Turn any product image into ready-to-post social media content. Upload a photo and AI will generate on-brand captions using your brand voice and identity."
+          tips={[
+            "Upload a product image to get started",
+            "Captions are generated using your brand voice and industry from Brand Vault",
+            "Copy captions directly to clipboard for quick posting",
+            "Generate multiple variations to find the perfect tone",
+          ]}
+        />
+
         <div className="card-neural p-12 flex flex-col items-center gap-4 animate-fade-in" style={{ animationDelay: '100ms' }}>
           <Upload className="w-12 h-12 text-muted-foreground/40" />
           <p className="text-muted-foreground">Select a product image to get started</p>
