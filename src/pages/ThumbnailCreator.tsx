@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { ImageResultEditor } from '@/components/ImageResultEditor';
+import { FeatureIntro } from '@/components/FeatureIntro';
 
 export default function ThumbnailCreator() {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
