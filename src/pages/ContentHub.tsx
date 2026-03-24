@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Upload, Sparkles, Copy, Check, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { FeatureIntro } from '@/components/FeatureIntro';
 
 export default function ContentHub() {
   const { profile } = useBrandProfile();
