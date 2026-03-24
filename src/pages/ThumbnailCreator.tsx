@@ -84,6 +84,18 @@ export default function ThumbnailCreator() {
         <p className="text-muted-foreground mt-1">Design eye-catching thumbnails for your content</p>
       </div>
 
+      <FeatureIntro
+        featureKey="thumbnail-creator"
+        title="How Thumbnail Creator Works"
+        description="Create scroll-stopping thumbnails for YouTube, blogs, or social media. Add a title, optionally upload a background image, and let AI do the rest."
+        tips={[
+          "Enter a catchy title — it will be rendered directly on the thumbnail",
+          "Upload a background image for a custom look, or let AI generate one",
+          "Refine your thumbnail with additional prompts after the first generation",
+          "Perfect for YouTube videos, blog posts, and social media covers",
+        ]}
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Left Panel: Settings */}
         <div className="lg:col-span-2 space-y-6 animate-fade-in" style={{ animationDelay: '100ms' }}>

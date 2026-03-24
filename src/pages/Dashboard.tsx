@@ -72,6 +72,18 @@ export default function Dashboard() {
         </div>
       </div>
 
+      <FeatureIntro
+        featureKey="dashboard"
+        title="Welcome to BrandPilot!"
+        description="This is your brand command center — a central hub to monitor your brand health, access all tools, and track recent activity."
+        tips={[
+          "Check your Brand Consistency score and complete missing profile items",
+          "Use Quick Actions to jump into any tool instantly",
+          "Try the Brand Assistant tab for AI-powered brand guidance",
+          "Recent Generations shows your latest creations across all tools",
+        ]}
+      />
+
       {activeTab === 'assistant' ? (
         <BrandAssistant />
       ) : (

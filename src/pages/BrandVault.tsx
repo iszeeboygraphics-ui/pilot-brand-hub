@@ -117,6 +117,18 @@ export default function BrandVault() {
         <p className="text-muted-foreground mt-1">Define your global brand identity</p>
       </div>
 
+      <FeatureIntro
+        featureKey="brand-vault"
+        title="What is the Brand Vault?"
+        description="Your brand's single source of truth. Set up your brand name, industry, voice, color palette, and logo here — all other BrandPilot tools pull from this profile automatically."
+        tips={[
+          "Fill in all fields to reach 100% Brand Consistency on your dashboard",
+          "Your color palette is used across Logo Creator, Scene Creator, and Content Hub",
+          "Upload a master logo to use as a base for AI-generated variations",
+          "Choose a brand voice to shape the tone of AI-generated captions and content",
+        ]}
+      />
+
       {/* Brand Info */}
       <div className="card-neural p-6 space-y-5 animate-fade-in" style={{ animationDelay: '100ms' }}>
         <h2 className="font-semibold flex items-center gap-2">

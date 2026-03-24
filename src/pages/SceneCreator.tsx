@@ -103,6 +103,18 @@ export default function SceneCreator() {
         <p className="text-muted-foreground mt-1">Place your products in professional environments using AI</p>
       </div>
 
+      <FeatureIntro
+        featureKey="scene-creator"
+        title="How Scene Creator Works"
+        description="Upload a product photo and pick an environment preset — AI will composite your product into a professional, branded scene in seconds."
+        tips={[
+          "Upload a clear product photo with a simple background for best results",
+          "Choose from 16 environment presets like Studio Lighting, Neon Night, or Botanical Garden",
+          "Download the generated scene or refine it with additional prompts",
+          "Great for social media posts, e-commerce listings, and marketing materials",
+        ]}
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Left panel */}
         <div className="lg:col-span-2 space-y-4 animate-fade-in" style={{ animationDelay: '100ms' }}>
