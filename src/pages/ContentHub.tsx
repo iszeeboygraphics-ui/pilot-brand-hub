@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useBrandProfile } from '@/hooks/useBrandProfile';
 import { Button } from '@/components/ui/button';
-import { Upload, Sparkles, Copy, Check, RefreshCw } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Upload, Sparkles, Copy, Check, RefreshCw, PenTool, Wand2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { FeatureIntro } from '@/components/FeatureIntro';
+import { ImageResultEditor } from '@/components/ImageResultEditor';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ContentHub() {
   const { profile } = useBrandProfile();
@@ -12,6 +15,9 @@ export default function ContentHub() {
   const [caption, setCaption] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [customPrompt, setCustomPrompt] = useState('');
+  const [customImage, setCustomImage] = useState<string | null>(null);
+  const [generatingCustom, setGeneratingCustom] = useState(false);
 
   const brandColors = [
     profile?.color_1 || '#8B5CF6',
@@ -63,6 +69,32 @@ export default function ContentHub() {
       setCopied(true);
       toast.success('Caption copied!');
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleCustomGenerate = async (refinementPrompt?: string) => {
+    if (!customPrompt.trim() && !refinementPrompt) {
+      toast.error('Please describe what you want to create');
+      return;
+    }
+    setGeneratingCustom(true);
+    if (!refinementPrompt) setCustomImage(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-thumbnail', {
+        body: {
+          title: refinementPrompt || customPrompt,
+          refinement: refinementPrompt ? refinementPrompt : undefined,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setCustomImage(data.image);
+      toast.success('Design generated!');
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || 'Failed to generate design');
+    } finally {
+      setGeneratingCustom(false);
     }
   };
 
@@ -186,6 +218,49 @@ export default function ContentHub() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Custom Prompt Section */}
+      <div className="card-neural p-5 space-y-4 animate-fade-in" style={{ animationDelay: '400ms' }}>
+        <div className="flex items-center gap-2">
+          <PenTool className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-sm">Custom AI Design — Flyers, Brand Kits & More</h3>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Describe any marketing asset you need — flyers, brand kits, mockups, social posts, banners, product showcases — and AI will generate it for you.
+        </p>
+        <Textarea
+          value={customPrompt}
+          onChange={(e) => setCustomPrompt(e.target.value)}
+          placeholder="e.g. Create a premium brand kit flyer for a tech startup with dark theme, featuring the logo prominently, product screenshots, and a bold CTA section..."
+          className="bg-background min-h-[100px] text-sm"
+        />
+        <Button
+          onClick={() => handleCustomGenerate()}
+          disabled={generatingCustom || !customPrompt.trim()}
+          className="w-full"
+        >
+          {generatingCustom ? (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          ) : (
+            <Wand2 className="w-4 h-4 mr-2" />
+          )}
+          {generatingCustom ? 'Generating design…' : 'Generate Design'}
+        </Button>
+
+        {generatingCustom && !customImage && (
+          <div className="aspect-[16/9] rounded-lg overflow-hidden">
+            <Skeleton className="w-full h-full" />
+          </div>
+        )}
+
+        {customImage && (
+          <ImageResultEditor
+            imageUrl={customImage}
+            onRefine={(prompt) => handleCustomGenerate(prompt)}
+            isRefining={generatingCustom}
+          />
+        )}
       </div>
     </div>
   );

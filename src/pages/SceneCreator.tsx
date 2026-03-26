@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, Download, Wand2, Image as ImageIcon } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Upload, Download, Wand2, Image as ImageIcon, PenTool } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -39,6 +40,8 @@ export default function SceneCreator() {
   const [productImage, setProductImage] = useState<string | null>(null);
   const [productFile, setProductFile] = useState<File | null>(null);
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+  const [customPrompt, setCustomPrompt] = useState('');
+  const [useCustomPrompt, setUseCustomPrompt] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [resultImage, setResultImage] = useState<string | null>(null);
 
@@ -58,7 +61,11 @@ export default function SceneCreator() {
   };
 
   const handleProcess = async (refinementPrompt?: string) => {
-    if (!productFile || !selectedPreset) return;
+    if (!productFile || (!selectedPreset && !useCustomPrompt)) return;
+    if (useCustomPrompt && !customPrompt.trim()) {
+      toast.error('Please enter a custom prompt');
+      return;
+    }
     setProcessing(true);
     if (!refinementPrompt) {
       setResultImage(null);
@@ -70,7 +77,8 @@ export default function SceneCreator() {
       const { data, error } = await supabase.functions.invoke('scene-composite', {
         body: { 
           imageBase64, 
-          preset: selectedPreset,
+          preset: useCustomPrompt ? 'custom' : selectedPreset,
+          customPrompt: useCustomPrompt ? customPrompt : undefined,
           refinement: typeof refinementPrompt === 'string' ? refinementPrompt : undefined,
         },
       });
@@ -136,30 +144,64 @@ export default function SceneCreator() {
             </div>
           </div>
 
-          {/* Presets */}
+          {/* Mode Toggle */}
           <div className="card-neural p-5 space-y-3">
-            <h3 className="font-semibold text-sm">Environment Presets</h3>
-            <div className="grid grid-cols-2 gap-2">
-              {presets.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => setSelectedPreset(p.id)}
-                  className={`p-3 rounded-lg border text-left text-sm transition-all active:scale-[0.97] ${
-                    selectedPreset === p.id
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border hover:border-muted-foreground/40'
-                  }`}
-                >
-                  <span className="text-lg block mb-1">{p.emoji}</span>
-                  <span className="text-xs">{p.label}</span>
-                </button>
-              ))}
+            <div className="flex gap-2">
+              <Button
+                variant={!useCustomPrompt ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setUseCustomPrompt(false)}
+                className="flex-1"
+              >
+                Presets
+              </Button>
+              <Button
+                variant={useCustomPrompt ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setUseCustomPrompt(true)}
+                className="flex-1"
+              >
+                <PenTool className="w-3.5 h-3.5 mr-1.5" />
+                Custom Prompt
+              </Button>
             </div>
+
+            {useCustomPrompt ? (
+              <div className="space-y-2">
+                <h3 className="font-semibold text-sm">Describe Your Scene</h3>
+                <Textarea
+                  value={customPrompt}
+                  onChange={(e) => setCustomPrompt(e.target.value)}
+                  placeholder="e.g. Place the product on a red velvet runway with dramatic spotlight, fashion show audience blurred in the background, editorial Vogue-style photography..."
+                  className="bg-background min-h-[120px] text-sm"
+                />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <h3 className="font-semibold text-sm">Environment Presets</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  {presets.map((p) => (
+                    <button
+                      key={p.id}
+                      onClick={() => setSelectedPreset(p.id)}
+                      className={`p-3 rounded-lg border text-left text-sm transition-all active:scale-[0.97] ${
+                        selectedPreset === p.id
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border hover:border-muted-foreground/40'
+                      }`}
+                    >
+                      <span className="text-lg block mb-1">{p.emoji}</span>
+                      <span className="text-xs">{p.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <Button
             onClick={() => handleProcess()}
-            disabled={!productImage || !selectedPreset || processing}
+            disabled={!productImage || (!selectedPreset && !useCustomPrompt) || (useCustomPrompt && !customPrompt.trim()) || processing}
             className="w-full"
           >
             <Wand2 className="w-4 h-4 mr-2" />

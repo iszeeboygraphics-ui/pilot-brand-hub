@@ -17,7 +17,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { imageBase64, preset, refinement } = await req.json();
+    const { imageBase64, preset, customPrompt, refinement } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -50,7 +50,9 @@ serve(async (req) => {
       }
     }
 
-    let prompt = presetPrompts[preset] || presetPrompts.studio;
+    let prompt = preset === 'custom' && customPrompt 
+      ? `Place this product in the following scene: ${customPrompt}. Make it look like professional product photography with realistic lighting and shadows.`
+      : (presetPrompts[preset] || presetPrompts.studio);
     if (profile?.color_1) {
       prompt += ` Subtly incorporate the brand's primary color ${profile.color_1} into the lighting or background elements.`;
     }
