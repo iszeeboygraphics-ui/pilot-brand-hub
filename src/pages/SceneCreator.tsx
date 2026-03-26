@@ -61,7 +61,11 @@ export default function SceneCreator() {
   };
 
   const handleProcess = async (refinementPrompt?: string) => {
-    if (!productFile || !selectedPreset) return;
+    if (!productFile || (!selectedPreset && !useCustomPrompt)) return;
+    if (useCustomPrompt && !customPrompt.trim()) {
+      toast.error('Please enter a custom prompt');
+      return;
+    }
     setProcessing(true);
     if (!refinementPrompt) {
       setResultImage(null);
