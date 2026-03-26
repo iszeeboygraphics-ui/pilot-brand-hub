@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useBrandProfile } from '@/hooks/useBrandProfile';
 import { Button } from '@/components/ui/button';
-import { Upload, Sparkles, Copy, Check, RefreshCw } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Upload, Sparkles, Copy, Check, RefreshCw, PenTool, Wand2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { FeatureIntro } from '@/components/FeatureIntro';
+import { ImageResultEditor } from '@/components/ImageResultEditor';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ContentHub() {
   const { profile } = useBrandProfile();
