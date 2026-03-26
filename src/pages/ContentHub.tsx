@@ -219,6 +219,49 @@ export default function ContentHub() {
           </div>
         </div>
       </div>
+
+      {/* Custom Prompt Section */}
+      <div className="card-neural p-5 space-y-4 animate-fade-in" style={{ animationDelay: '400ms' }}>
+        <div className="flex items-center gap-2">
+          <PenTool className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-sm">Custom AI Design — Flyers, Brand Kits & More</h3>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Describe any marketing asset you need — flyers, brand kits, mockups, social posts, banners, product showcases — and AI will generate it for you.
+        </p>
+        <Textarea
+          value={customPrompt}
+          onChange={(e) => setCustomPrompt(e.target.value)}
+          placeholder="e.g. Create a premium brand kit flyer for a tech startup with dark theme, featuring the logo prominently, product screenshots, and a bold CTA section..."
+          className="bg-background min-h-[100px] text-sm"
+        />
+        <Button
+          onClick={() => handleCustomGenerate()}
+          disabled={generatingCustom || !customPrompt.trim()}
+          className="w-full"
+        >
+          {generatingCustom ? (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          ) : (
+            <Wand2 className="w-4 h-4 mr-2" />
+          )}
+          {generatingCustom ? 'Generating design…' : 'Generate Design'}
+        </Button>
+
+        {generatingCustom && !customImage && (
+          <div className="aspect-[16/9] rounded-lg overflow-hidden">
+            <Skeleton className="w-full h-full" />
+          </div>
+        )}
+
+        {customImage && (
+          <ImageResultEditor
+            imageUrl={customImage}
+            onRefine={(prompt) => handleCustomGenerate(prompt)}
+            isRefining={generatingCustom}
+          />
+        )}
+      </div>
     </div>
   );
 }
