@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, Download, Wand2, Image as ImageIcon } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Upload, Download, Wand2, Image as ImageIcon, PenTool } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
