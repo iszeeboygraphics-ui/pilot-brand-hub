@@ -19,6 +19,13 @@ interface PaletteSuggestion {
   colors: string[];
 }
 
+interface FontSuggestion {
+  name: string;
+  reason: string;
+  heading: string;
+  body: string;
+}
+
 const INDUSTRIES = [
   'Advertising & Marketing', 'Agriculture', 'Architecture & Design', 'Automotive',
   'Beauty & Cosmetics', 'Biotechnology', 'Blockchain & Web3', 'Construction',
