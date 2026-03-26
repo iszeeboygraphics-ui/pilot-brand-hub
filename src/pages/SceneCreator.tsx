@@ -77,7 +77,11 @@ export default function SceneCreator() {
       const { data, error } = await supabase.functions.invoke('scene-composite', {
         body: { 
           imageBase64, 
-          preset: selectedPreset,
+          preset: useCustomPrompt ? 'custom' : selectedPreset,
+          customPrompt: useCustomPrompt ? customPrompt : undefined,
+          refinement: typeof refinementPrompt === 'string' ? refinementPrompt : undefined,
+        },
+      });
           refinement: typeof refinementPrompt === 'string' ? refinementPrompt : undefined,
         },
       });
