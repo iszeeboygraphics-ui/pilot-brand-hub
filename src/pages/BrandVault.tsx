@@ -93,6 +93,28 @@ export default function BrandVault() {
     }
   };
 
+  const handleSuggestFonts = async () => {
+    if (!brandName && !industry && !brandVoice) {
+      toast.error('Please fill in at least one field first');
+      return;
+    }
+    setSuggestingFonts(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('suggest-fonts', {
+        body: { brandName, industry, brandVoice },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setFontSuggestions(data.fonts || []);
+      toast.success('Font suggestions ready!');
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || 'Failed to suggest fonts');
+    } finally {
+      setSuggestingFonts(false);
+    }
+  };
+
   const applyPalette = (palette: PaletteSuggestion) => {
     setColors([palette.colors[0], palette.colors[1], palette.colors[2]]);
     toast.success(`Applied "${palette.name}" palette`);
