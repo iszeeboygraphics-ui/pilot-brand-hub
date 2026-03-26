@@ -82,9 +82,6 @@ export default function SceneCreator() {
           refinement: typeof refinementPrompt === 'string' ? refinementPrompt : undefined,
         },
       });
-          refinement: typeof refinementPrompt === 'string' ? refinementPrompt : undefined,
-        },
-      });
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
