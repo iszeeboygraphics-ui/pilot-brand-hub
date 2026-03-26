@@ -337,7 +337,55 @@ export default function BrandVault() {
         </div>
       </div>
 
-      {/* Logo Upload */}
+      {/* Font Suggestions */}
+      <div className="card-neural p-6 space-y-4 animate-fade-in" style={{ animationDelay: '250ms' }}>
+        <h2 className="font-semibold flex items-center gap-2">
+          <Type className="w-4 h-4 text-primary" /> Typography — Font Pairing
+        </h2>
+        <p className="text-sm text-muted-foreground">Get AI-suggested Google Font pairings that match your brand identity.</p>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleSuggestFonts}
+          disabled={suggestingFonts}
+          className="w-full"
+        >
+          {suggestingFonts ? (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          ) : (
+            <Type className="w-4 h-4 mr-2" />
+          )}
+          {suggestingFonts ? 'Generating suggestions…' : 'Suggest AI Font Pairings'}
+        </Button>
+
+        {fontSuggestions.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {fontSuggestions.map((f, i) => {
+              const headingUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(f.heading)}:wght@700&display=swap`;
+              const bodyUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(f.body)}:wght@400&display=swap`;
+              return (
+                <div
+                  key={i}
+                  className="p-3 rounded-lg border border-border hover:border-primary/50 transition-all text-left space-y-2 hover:bg-primary/5"
+                >
+                  <link href={headingUrl} rel="stylesheet" />
+                  <link href={bodyUrl} rel="stylesheet" />
+                  <p className="text-lg font-bold" style={{ fontFamily: `'${f.heading}', sans-serif` }}>
+                    {f.heading}
+                  </p>
+                  <p className="text-sm" style={{ fontFamily: `'${f.body}', sans-serif` }}>
+                    {f.body} — The quick brown fox jumps over the lazy dog.
+                  </p>
+                  <p className="text-xs font-semibold text-primary">{f.name}</p>
+                  <p className="text-xs text-muted-foreground leading-snug">{f.reason}</p>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       <div className="card-neural p-6 space-y-4 animate-fade-in" style={{ animationDelay: '300ms' }}>
         <h2 className="font-semibold">Master Logo</h2>
         <div
