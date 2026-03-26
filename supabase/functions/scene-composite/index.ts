@@ -50,7 +50,9 @@ serve(async (req) => {
       }
     }
 
-    let prompt = presetPrompts[preset] || presetPrompts.studio;
+    let prompt = preset === 'custom' && customPrompt 
+      ? `Place this product in the following scene: ${customPrompt}. Make it look like professional product photography with realistic lighting and shadows.`
+      : (presetPrompts[preset] || presetPrompts.studio);
     if (profile?.color_1) {
       prompt += ` Subtly incorporate the brand's primary color ${profile.color_1} into the lighting or background elements.`;
     }
