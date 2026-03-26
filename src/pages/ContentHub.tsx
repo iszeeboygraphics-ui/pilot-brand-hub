@@ -72,6 +72,32 @@ export default function ContentHub() {
     }
   };
 
+  const handleCustomGenerate = async (refinementPrompt?: string) => {
+    if (!customPrompt.trim() && !refinementPrompt) {
+      toast.error('Please describe what you want to create');
+      return;
+    }
+    setGeneratingCustom(true);
+    if (!refinementPrompt) setCustomImage(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-thumbnail', {
+        body: {
+          title: refinementPrompt || customPrompt,
+          refinement: refinementPrompt ? refinementPrompt : undefined,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setCustomImage(data.image);
+      toast.success('Design generated!');
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || 'Failed to generate design');
+    } finally {
+      setGeneratingCustom(false);
+    }
+  };
+
   if (!productImage) {
     return (
       <div className="max-w-5xl mx-auto space-y-6">
