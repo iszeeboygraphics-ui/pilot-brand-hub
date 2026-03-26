@@ -15,6 +15,9 @@ export default function ContentHub() {
   const [caption, setCaption] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [customPrompt, setCustomPrompt] = useState('');
+  const [customImage, setCustomImage] = useState<string | null>(null);
+  const [generatingCustom, setGeneratingCustom] = useState(false);
 
   const brandColors = [
     profile?.color_1 || '#8B5CF6',
