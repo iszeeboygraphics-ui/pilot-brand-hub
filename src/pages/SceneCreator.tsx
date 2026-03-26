@@ -40,6 +40,8 @@ export default function SceneCreator() {
   const [productImage, setProductImage] = useState<string | null>(null);
   const [productFile, setProductFile] = useState<File | null>(null);
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+  const [customPrompt, setCustomPrompt] = useState('');
+  const [useCustomPrompt, setUseCustomPrompt] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [resultImage, setResultImage] = useState<string | null>(null);
 
