@@ -35,26 +35,28 @@ function AuthRoute() {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/auth" element={<AuthRoute />} />
-            <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/brand-vault" element={<ProtectedRoute><BrandVault /></ProtectedRoute>} />
-            <Route path="/scene-creator" element={<ProtectedRoute><SceneCreator /></ProtectedRoute>} />
-            <Route path="/content-hub" element={<ProtectedRoute><ContentHub /></ProtectedRoute>} />
-            <Route path="/logo-creator" element={<ProtectedRoute><LogoCreator /></ProtectedRoute>} />
-            <Route path="/thumbnail-creator" element={<ProtectedRoute><ThumbnailCreator /></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              <Route path="/auth" element={<AuthRoute />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/brand-vault" element={<ProtectedRoute><BrandVault /></ProtectedRoute>} />
+              <Route path="/scene-creator" element={<ProtectedRoute><SceneCreator /></ProtectedRoute>} />
+              <Route path="/content-hub" element={<ProtectedRoute><ContentHub /></ProtectedRoute>} />
+              <Route path="/logo-creator" element={<ProtectedRoute><LogoCreator /></ProtectedRoute>} />
+              <Route path="/thumbnail-creator" element={<ProtectedRoute><ThumbnailCreator /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
