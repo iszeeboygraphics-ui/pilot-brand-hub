@@ -266,6 +266,44 @@ export default function BrandVault() {
             <div key={i} className="flex-1" style={{ backgroundColor: c }} />
           ))}
         </div>
+
+        {/* AI Palette Suggestions */}
+        <div className="pt-2 space-y-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSuggestPalette}
+            disabled={suggestingPalette}
+            className="w-full"
+          >
+            {suggestingPalette ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Sparkles className="w-4 h-4 mr-2" />
+            )}
+            {suggestingPalette ? 'Generating suggestions…' : 'Suggest AI Color Palettes'}
+          </Button>
+
+          {paletteSuggestions.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {paletteSuggestions.map((p, i) => (
+                <button
+                  key={i}
+                  onClick={() => applyPalette(p)}
+                  className="p-3 rounded-lg border border-border hover:border-primary/50 transition-all text-left space-y-2 hover:bg-primary/5"
+                >
+                  <div className="flex rounded overflow-hidden h-6">
+                    {p.colors.map((c, j) => (
+                      <div key={j} className="flex-1" style={{ backgroundColor: c }} />
+                    ))}
+                  </div>
+                  <p className="text-xs font-semibold">{p.name}</p>
+                  <p className="text-xs text-muted-foreground leading-snug">{p.reason}</p>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Logo Upload */}
