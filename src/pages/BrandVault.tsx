@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Upload, Save, Palette, X, Check, ChevronsUpDown, Sparkles, Loader2 } from 'lucide-react';
+import { Upload, Save, Palette, X, Check, ChevronsUpDown, Sparkles, Loader2, Type } from 'lucide-react';
 import { toast } from 'sonner';
 import { FeatureIntro } from '@/components/FeatureIntro';
 
