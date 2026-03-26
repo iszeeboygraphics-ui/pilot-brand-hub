@@ -68,6 +68,8 @@ export default function BrandVault() {
   const [industryOpen, setIndustryOpen] = useState(false);
   const [paletteSuggestions, setPaletteSuggestions] = useState<PaletteSuggestion[]>([]);
   const [suggestingPalette, setSuggestingPalette] = useState(false);
+  const [fontSuggestions, setFontSuggestions] = useState<FontSuggestion[]>([]);
+  const [suggestingFonts, setSuggestingFonts] = useState(false);
 
   const handleSuggestPalette = async () => {
     if (!brandName && !industry && !brandVoice) {
