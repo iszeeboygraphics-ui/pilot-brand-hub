@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Upload, Save, Palette, X, Check, ChevronsUpDown, Sparkles, Loader2 } from 'lucide-react';
+import { Upload, Save, Palette, X, Check, ChevronsUpDown, Sparkles, Loader2, Type } from 'lucide-react';
 import { toast } from 'sonner';
 import { FeatureIntro } from '@/components/FeatureIntro';
 
@@ -17,6 +17,13 @@ interface PaletteSuggestion {
   name: string;
   reason: string;
   colors: string[];
+}
+
+interface FontSuggestion {
+  name: string;
+  reason: string;
+  heading: string;
+  body: string;
 }
 
 const INDUSTRIES = [
@@ -61,6 +68,8 @@ export default function BrandVault() {
   const [industryOpen, setIndustryOpen] = useState(false);
   const [paletteSuggestions, setPaletteSuggestions] = useState<PaletteSuggestion[]>([]);
   const [suggestingPalette, setSuggestingPalette] = useState(false);
+  const [fontSuggestions, setFontSuggestions] = useState<FontSuggestion[]>([]);
+  const [suggestingFonts, setSuggestingFonts] = useState(false);
 
   const handleSuggestPalette = async () => {
     if (!brandName && !industry && !brandVoice) {
@@ -81,6 +90,28 @@ export default function BrandVault() {
       toast.error(err.message || 'Failed to suggest palettes');
     } finally {
       setSuggestingPalette(false);
+    }
+  };
+
+  const handleSuggestFonts = async () => {
+    if (!brandName && !industry && !brandVoice) {
+      toast.error('Please fill in at least one field first');
+      return;
+    }
+    setSuggestingFonts(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('suggest-fonts', {
+        body: { brandName, industry, brandVoice },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setFontSuggestions(data.fonts || []);
+      toast.success('Font suggestions ready!');
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || 'Failed to suggest fonts');
+    } finally {
+      setSuggestingFonts(false);
     }
   };
 
@@ -306,7 +337,55 @@ export default function BrandVault() {
         </div>
       </div>
 
-      {/* Logo Upload */}
+      {/* Font Suggestions */}
+      <div className="card-neural p-6 space-y-4 animate-fade-in" style={{ animationDelay: '250ms' }}>
+        <h2 className="font-semibold flex items-center gap-2">
+          <Type className="w-4 h-4 text-primary" /> Typography — Font Pairing
+        </h2>
+        <p className="text-sm text-muted-foreground">Get AI-suggested Google Font pairings that match your brand identity.</p>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleSuggestFonts}
+          disabled={suggestingFonts}
+          className="w-full"
+        >
+          {suggestingFonts ? (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          ) : (
+            <Type className="w-4 h-4 mr-2" />
+          )}
+          {suggestingFonts ? 'Generating suggestions…' : 'Suggest AI Font Pairings'}
+        </Button>
+
+        {fontSuggestions.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {fontSuggestions.map((f, i) => {
+              const headingUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(f.heading)}:wght@700&display=swap`;
+              const bodyUrl = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(f.body)}:wght@400&display=swap`;
+              return (
+                <div
+                  key={i}
+                  className="p-3 rounded-lg border border-border hover:border-primary/50 transition-all text-left space-y-2 hover:bg-primary/5"
+                >
+                  <link href={headingUrl} rel="stylesheet" />
+                  <link href={bodyUrl} rel="stylesheet" />
+                  <p className="text-lg font-bold" style={{ fontFamily: `'${f.heading}', sans-serif` }}>
+                    {f.heading}
+                  </p>
+                  <p className="text-sm" style={{ fontFamily: `'${f.body}', sans-serif` }}>
+                    {f.body} — The quick brown fox jumps over the lazy dog.
+                  </p>
+                  <p className="text-xs font-semibold text-primary">{f.name}</p>
+                  <p className="text-xs text-muted-foreground leading-snug">{f.reason}</p>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       <div className="card-neural p-6 space-y-4 animate-fade-in" style={{ animationDelay: '300ms' }}>
         <h2 className="font-semibold">Master Logo</h2>
         <div
