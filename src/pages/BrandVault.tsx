@@ -59,6 +59,35 @@ export default function BrandVault() {
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [industryOpen, setIndustryOpen] = useState(false);
+  const [paletteSuggestions, setPaletteSuggestions] = useState<PaletteSuggestion[]>([]);
+  const [suggestingPalette, setSuggestingPalette] = useState(false);
+
+  const handleSuggestPalette = async () => {
+    if (!brandName && !industry && !brandVoice) {
+      toast.error('Please fill in at least one field (name, industry, or voice) first');
+      return;
+    }
+    setSuggestingPalette(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('suggest-palette', {
+        body: { brandName, industry, brandVoice },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setPaletteSuggestions(data.palettes || []);
+      toast.success('Palette suggestions ready!');
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || 'Failed to suggest palettes');
+    } finally {
+      setSuggestingPalette(false);
+    }
+  };
+
+  const applyPalette = (palette: PaletteSuggestion) => {
+    setColors([palette.colors[0], palette.colors[1], palette.colors[2]]);
+    toast.success(`Applied "${palette.name}" palette`);
+  };
 
   useEffect(() => {
     if (profile) {
