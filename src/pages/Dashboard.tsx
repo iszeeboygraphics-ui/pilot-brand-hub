@@ -160,4 +160,6 @@ const Dashboard = React.forwardRef<HTMLDivElement>(function Dashboard(_props, re
       )}
     </div>
   );
-}
+});
+
+export default Dashboard;
