@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useBrandProfile } from '@/hooks/useBrandProfile';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, Sparkles, Copy, Check, RefreshCw, PenTool, Wand2, Loader2 } from 'lucide-react';
+import { Upload, Sparkles, Copy, Check, RefreshCw, PenTool, Wand2, Loader2, ImageIcon, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { FeatureIntro } from '@/components/FeatureIntro';
@@ -18,6 +18,8 @@ export default function ContentHub() {
   const [customPrompt, setCustomPrompt] = useState('');
   const [customImage, setCustomImage] = useState<string | null>(null);
   const [generatingCustom, setGeneratingCustom] = useState(false);
+  const [flyerImage, setFlyerImage] = useState<string | null>(null);
+  const [generatingFlyer, setGeneratingFlyer] = useState(false);
 
   const brandColors = [
     profile?.color_1 || '#8B5CF6',
@@ -69,6 +71,30 @@ export default function ContentHub() {
       setCopied(true);
       toast.success('Caption copied!');
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleGenerateFlyer = async () => {
+    if (!caption && !productImage) {
+      toast.error('Generate a caption first to create the flyer');
+      return;
+    }
+    setGeneratingFlyer(true);
+    try {
+      const flyerPrompt = `Create a professional, high-quality 1080x1080 square product flyer for ${profile?.brand_name || 'a brand'}. ${profile?.industry ? `Industry: ${profile.industry}.` : ''} ${profile?.brand_voice ? `Brand voice: ${profile.brand_voice}.` : ''} ${profile?.color_1 ? `Use brand colors: ${profile.color_1}, ${profile.color_2 || ''}, ${profile.color_3 || ''}.` : ''} ${caption ? `Include this sales copy in the flyer design: "${caption.slice(0, 300)}"` : 'Create compelling promotional copy for the flyer.'} Make it bold, modern, and ready for social media posting. Include a clear call-to-action. The layout should be clean with strong visual hierarchy.`;
+
+      const { data, error } = await supabase.functions.invoke('generate-thumbnail', {
+        body: { title: flyerPrompt },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setFlyerImage(data.image);
+      toast.success('Flyer generated!');
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || 'Failed to generate flyer');
+    } finally {
+      setGeneratingFlyer(false);
     }
   };
 
@@ -145,22 +171,48 @@ export default function ContentHub() {
         {/* Column A — The Flyer (1080x1080) */}
         <div className="card-neural p-4 space-y-3 animate-fade-in" style={{ animationDelay: '100ms' }}>
           <h3 className="font-semibold text-sm">The Flyer — 1080×1080</h3>
-          <div className="aspect-square rounded-lg overflow-hidden relative" style={{ backgroundColor: brandColors[0] }}>
-            <img src={productImage} alt="Product" className="w-full h-full object-contain p-6" />
-            <div className="absolute bottom-0 left-0 right-0 p-3 flex items-center justify-between" style={{ backgroundColor: brandColors[1] + 'dd' }}>
-              <span className="text-xs font-bold text-white truncate">
-                {profile?.brand_name || 'Your Brand'}
-              </span>
-              <div className="flex gap-1">
-                {brandColors.map((c, i) => (
-                  <div key={i} className="w-3 h-3 rounded-full border border-white/30" style={{ backgroundColor: c }} />
-                ))}
+          {generatingFlyer && !flyerImage && (
+            <div className="aspect-square rounded-lg overflow-hidden">
+              <Skeleton className="w-full h-full" />
+            </div>
+          )}
+          {flyerImage ? (
+            <div className="space-y-3">
+              <div className="aspect-square rounded-lg overflow-hidden border border-border bg-muted/30">
+                <img src={flyerImage} alt="Generated Flyer" className="w-full h-full object-contain" />
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleGenerateFlyer} disabled={generatingFlyer} size="sm" className="flex-1">
+                  <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${generatingFlyer ? 'animate-spin' : ''}`} />
+                  {generatingFlyer ? 'Regenerating…' : 'Regenerate'}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => {
+                  const link = document.createElement('a');
+                  link.href = flyerImage;
+                  link.download = `flyer-${Date.now()}.png`;
+                  link.target = '_blank';
+                  link.click();
+                }}>
+                  <Download className="w-3.5 h-3.5" />
+                </Button>
               </div>
             </div>
-            {profile?.logo_url && (
-              <img src={profile.logo_url} alt="Logo" className="absolute top-3 left-3 h-6 w-auto object-contain drop-shadow-lg" />
-            )}
-          </div>
+          ) : (
+            <div className="aspect-square rounded-lg overflow-hidden relative flex flex-col items-center justify-center gap-3" style={{ backgroundColor: brandColors[0] + '22', border: `1px dashed ${brandColors[0]}66` }}>
+              <ImageIcon className="w-10 h-10 text-muted-foreground/40" />
+              <p className="text-xs text-muted-foreground text-center px-4">
+                {caption ? 'Ready to generate your flyer' : 'Generate a caption first, then create your flyer'}
+              </p>
+              <Button onClick={handleGenerateFlyer} disabled={generatingFlyer || !caption} size="sm">
+                {generatingFlyer ? (
+                  <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                ) : (
+                  <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                )}
+                {generatingFlyer ? 'Generating…' : 'Generate Flyer'}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Column B — The Story (1080x1920) */}
