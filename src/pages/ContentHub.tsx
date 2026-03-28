@@ -74,6 +74,30 @@ export default function ContentHub() {
     }
   };
 
+  const handleGenerateFlyer = async () => {
+    if (!caption && !productImage) {
+      toast.error('Generate a caption first to create the flyer');
+      return;
+    }
+    setGeneratingFlyer(true);
+    try {
+      const flyerPrompt = `Create a professional, high-quality 1080x1080 square product flyer for ${profile?.brand_name || 'a brand'}. ${profile?.industry ? `Industry: ${profile.industry}.` : ''} ${profile?.brand_voice ? `Brand voice: ${profile.brand_voice}.` : ''} ${profile?.color_1 ? `Use brand colors: ${profile.color_1}, ${profile.color_2 || ''}, ${profile.color_3 || ''}.` : ''} ${caption ? `Include this sales copy in the flyer design: "${caption.slice(0, 300)}"` : 'Create compelling promotional copy for the flyer.'} Make it bold, modern, and ready for social media posting. Include a clear call-to-action. The layout should be clean with strong visual hierarchy.`;
+
+      const { data, error } = await supabase.functions.invoke('generate-thumbnail', {
+        body: { title: flyerPrompt },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setFlyerImage(data.image);
+      toast.success('Flyer generated!');
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || 'Failed to generate flyer');
+    } finally {
+      setGeneratingFlyer(false);
+    }
+  };
+
   const handleCustomGenerate = async (refinementPrompt?: string) => {
     if (!customPrompt.trim() && !refinementPrompt) {
       toast.error('Please describe what you want to create');
