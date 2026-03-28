@@ -41,7 +41,6 @@ serve(async (req) => {
     const brandName = profile?.brand_name || reqBrand;
     const industry = profile?.industry || reqInd;
     const brandVoice = profile?.brand_voice || reqVoice;
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const voiceGuide: Record<string, string> = {
       luxury: "Use sophisticated, aspirational language. Evoke exclusivity and premium quality.",
