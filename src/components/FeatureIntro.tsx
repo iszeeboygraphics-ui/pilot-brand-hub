@@ -1,5 +1,5 @@
+import React, { useState, useEffect } from 'react';
 import { Info, X } from 'lucide-react';
-import { useState, useEffect } from 'react';
 
 interface FeatureIntroProps {
   featureKey: string;
@@ -8,7 +8,7 @@ interface FeatureIntroProps {
   tips: string[];
 }
 
-export function FeatureIntro({ featureKey, title, description, tips }: FeatureIntroProps) {
+export const FeatureIntro = React.forwardRef<HTMLDivElement, FeatureIntroProps>(function FeatureIntro({ featureKey, title, description, tips }, _ref) {
   const storageKey = `brandpilot_intro_dismissed_${featureKey}`;
   const [visible, setVisible] = useState(false);
 
@@ -52,4 +52,4 @@ export function FeatureIntro({ featureKey, title, description, tips }: FeatureIn
       </div>
     </div>
   );
-}
+});

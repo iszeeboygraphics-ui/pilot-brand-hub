@@ -1,14 +1,14 @@
+import React, { useState, useEffect } from 'react';
 import { useBrandProfile } from '@/hooks/useBrandProfile';
 import { useAuth } from '@/hooks/useAuth';
 import { Progress } from '@/components/ui/progress';
 import { Palette, Layers, FileText, TrendingUp, CheckCircle2, Wand2, Image as ImageIcon, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useState, useEffect } from 'react';
 import { BrandAssistant } from '@/components/BrandAssistant';
 import { FeatureIntro } from '@/components/FeatureIntro';
 
-export default function Dashboard() {
+const Dashboard = React.forwardRef<HTMLDivElement>(function Dashboard(_props, ref) {
   const { user } = useAuth();
   const { profile, completionScore, isLoading } = useBrandProfile();
   const navigate = useNavigate();
@@ -160,4 +160,6 @@ export default function Dashboard() {
       )}
     </div>
   );
-}
+});
+
+export default Dashboard;

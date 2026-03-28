@@ -226,7 +226,7 @@ export default function BrandVault() {
                           <CommandItem
                             key={ind}
                             value={ind}
-                            onSelect={(val) => { setIndustry(val); setIndustryOpen(false); }}
+                            onSelect={() => { setIndustry(ind); setIndustryOpen(false); }}
                           >
                             <Check className={`mr-2 h-4 w-4 ${industry === ind ? 'opacity-100' : 'opacity-0'}`} />
                             {ind}
