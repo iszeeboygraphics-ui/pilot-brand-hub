@@ -52,4 +52,4 @@ export const FeatureIntro = React.forwardRef<HTMLDivElement, FeatureIntroProps>(
       </div>
     </div>
   );
-}
+});
