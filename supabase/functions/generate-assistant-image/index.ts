@@ -9,13 +9,29 @@ const corsHeaders = {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Authentication required" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Invalid or expired token" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const userId = user.id;
+
     const { prompt } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
-
-    const authHeader = req.headers.get('Authorization');
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
     // Call Lovable AI Image model
     const imageResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -34,22 +50,14 @@ serve(async (req) => {
     const generatedImageUrl = imgData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 
     // Log the image generation history
-    let userId = null;
-    if (authHeader && supabaseUrl && supabaseServiceKey) {
-      try {
-        const token = authHeader.replace('Bearer ', '');
-        userId = JSON.parse(atob(token.split('.')[1])).sub;
-        if (userId) {
-          const adminClient = createClient(supabaseUrl, supabaseServiceKey);
-          await adminClient.from('generated_activities').insert({
-            user_id: userId,
-            activity_type: 'logo', // Use generic logo/media type
-            details: { content: prompt, imageUrl: generatedImageUrl, isChat: true }
-          });
-        }
-      } catch (e) {
-        console.error("JWT/Logging error:", e);
-      }
+    try {
+      await supabaseClient.from('generated_activities').insert({
+        user_id: userId,
+        activity_type: 'logo',
+        details: { content: prompt, imageUrl: generatedImageUrl, isChat: true }
+      });
+    } catch (e) {
+      console.error("Logging error:", e);
     }
 
     return new Response(JSON.stringify({ imageUrl: generatedImageUrl }), {

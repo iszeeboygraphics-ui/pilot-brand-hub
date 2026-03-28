@@ -17,6 +17,26 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Authentication required" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Invalid or expired token" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const userId = user.id;
+
     const { imageBase64, preset, customPrompt, refinement } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -27,28 +47,9 @@ serve(async (req) => {
       });
     }
 
-    const authHeader = req.headers.get('Authorization');
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    
     let profile = null;
-    let userId = null;
-    
-    if (authHeader && supabaseUrl && supabaseServiceKey) {
-      try {
-        const token = authHeader.replace('Bearer ', '');
-        const payloadBase64 = token.split('.')[1];
-        const payload = JSON.parse(atob(payloadBase64));
-        userId = payload.sub;
-      } catch (e) {
-        console.error("JWT decode error:", e);
-      }
-      if (userId) {
-        const adminClient = createClient(supabaseUrl, supabaseServiceKey);
-        const { data } = await adminClient.from('brand_profiles').select('*').eq('user_id', userId).maybeSingle();
-        profile = data;
-      }
-    }
+    const { data } = await supabaseClient.from('brand_profiles').select('*').eq('user_id', userId).maybeSingle();
+    profile = data;
 
     let prompt = preset === 'custom' && customPrompt 
       ? `Place this product in the following scene: ${customPrompt}. Make it look like professional product photography with realistic lighting and shadows.`
