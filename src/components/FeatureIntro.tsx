@@ -8,7 +8,7 @@ interface FeatureIntroProps {
   tips: string[];
 }
 
-export function FeatureIntro({ featureKey, title, description, tips }: FeatureIntroProps) {
+export const FeatureIntro = React.forwardRef<HTMLDivElement, FeatureIntroProps>(function FeatureIntro({ featureKey, title, description, tips }, _ref) {
   const storageKey = `brandpilot_intro_dismissed_${featureKey}`;
   const [visible, setVisible] = useState(false);
 
