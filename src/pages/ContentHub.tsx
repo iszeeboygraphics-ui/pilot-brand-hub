@@ -18,6 +18,8 @@ export default function ContentHub() {
   const [customPrompt, setCustomPrompt] = useState('');
   const [customImage, setCustomImage] = useState<string | null>(null);
   const [generatingCustom, setGeneratingCustom] = useState(false);
+  const [flyerImage, setFlyerImage] = useState<string | null>(null);
+  const [generatingFlyer, setGeneratingFlyer] = useState(false);
 
   const brandColors = [
     profile?.color_1 || '#8B5CF6',
