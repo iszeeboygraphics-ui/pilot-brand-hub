@@ -99,15 +99,12 @@ serve(async (req) => {
       throw new Error("No image was generated");
     }
 
-    if (supabaseUrl && supabaseServiceKey && userId) {
-      const adminClient = createClient(supabaseUrl, supabaseServiceKey);
-      const { error } = await adminClient.from('generated_activities').insert({
-        user_id: userId,
-        activity_type: 'logo',
-        details: { imageUrl: generatedImage, brandName, style }
-      });
-      if (error) console.error("DB Insert Error:", error);
-    }
+    const { error } = await supabaseClient.from('generated_activities').insert({
+      user_id: userId,
+      activity_type: 'logo',
+      details: { imageUrl: generatedImage, brandName, style }
+    });
+    if (error) console.error("DB Insert Error:", error);
 
     return new Response(JSON.stringify({ image: generatedImage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

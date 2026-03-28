@@ -93,9 +93,8 @@ Output ONLY the caption text — no labels, no markdown, no explanations. Includ
     const data = await response.json();
     const caption = data.choices?.[0]?.message?.content;
 
-    if (supabaseUrl && supabaseServiceKey && userId && caption) {
-      const adminClient = createClient(supabaseUrl, supabaseServiceKey);
-      const { error } = await adminClient.from('generated_activities').insert({
+    if (caption) {
+      const { error } = await supabaseClient.from('generated_activities').insert({
         user_id: userId,
         activity_type: 'caption',
         details: { content: caption }
