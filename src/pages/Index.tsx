@@ -1,4 +1,4 @@
-import { ArrowRight, Box, Image as ImageIcon, Layout, Sparkles, FolderHeart } from "lucide-react";
+import { ArrowRight, Box, Image as ImageIcon, Layout, Sparkles, FolderHeart, Phone, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -95,13 +95,34 @@ export default function Index() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border/50 relative z-10 py-8">
-        <div className="container mx-auto px-6 text-center flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-muted-foreground text-sm">
-            &copy; {new Date().getFullYear()} Pilot Brand Hub. All rights reserved.
+      <footer className="border-t border-border/50 relative z-10 py-10">
+        <div className="container mx-auto px-6 flex flex-col gap-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-primary/20 flex items-center justify-center border border-primary/30">
+                <Sparkles className="w-3.5 h-3.5 text-primary" />
+              </div>
+              <span className="font-bold text-sm tracking-tight">Pilot Brand Hub</span>
+            </div>
+            <div className="flex flex-col sm:flex-row items-center gap-3 text-sm text-muted-foreground">
+              <a href="tel:+2348159319278" className="hover:text-primary transition-colors flex items-center gap-1.5">
+                <Phone className="w-3.5 h-3.5" />
+                +234 815 931 9278
+              </a>
+              <span className="hidden sm:inline text-border">|</span>
+              <a href="mailto:iszeeboygraphics@gmail.com" className="hover:text-primary transition-colors flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5" />
+                iszeeboygraphics@gmail.com
+              </a>
+            </div>
           </div>
-          <div className="text-sm text-muted-foreground font-medium flex items-center justify-center gap-1">
-             Elevating brands globally <Box className="w-4 h-4 ml-1 inline text-primary" />
+          <div className="border-t border-border/30 pt-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div className="text-muted-foreground text-xs">
+              &copy; {new Date().getFullYear()} Pilot Brand Hub. All rights reserved.
+            </div>
+            <div className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+              Elevating brands globally <Box className="w-4 h-4 ml-1 inline text-primary" />
+            </div>
           </div>
         </div>
       </footer>
