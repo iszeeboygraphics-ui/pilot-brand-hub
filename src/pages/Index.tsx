@@ -1,4 +1,4 @@
-import { ArrowRight, Box, Image as ImageIcon, Layout, Sparkles, FolderHeart } from "lucide-react";
+import { ArrowRight, Box, Image as ImageIcon, Layout, Sparkles, FolderHeart, Phone, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
