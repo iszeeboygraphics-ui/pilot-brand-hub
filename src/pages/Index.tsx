@@ -116,6 +116,17 @@ export default function Index() {
               </a>
             </div>
           </div>
+          <div className="flex items-center justify-center gap-4">
+            <a href="https://instagram.com/israelogunsola" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-muted/50 border border-border/50 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors">
+              <Instagram className="w-4 h-4" />
+            </a>
+            <a href="https://twitter.com/israelogunsola" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-muted/50 border border-border/50 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors">
+              <Twitter className="w-4 h-4" />
+            </a>
+            <a href="https://linkedin.com/in/israelogunsola" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-muted/50 border border-border/50 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors">
+              <Linkedin className="w-4 h-4" />
+            </a>
+          </div>
           <div className="border-t border-border/30 pt-4 flex flex-col sm:flex-row items-center justify-between gap-2">
             <div className="text-muted-foreground text-xs">
               &copy; {new Date().getFullYear()} Pilot Brand Hub. All rights reserved.
