@@ -2,12 +2,19 @@ import { ArrowRight, Box, Image as ImageIcon, Layout, Sparkles, FolderHeart, Pho
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { PageSeo } from "@/components/PageSeo";
 
 export default function Index() {
   const { user } = useAuth();
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground overflow-hidden selection:bg-primary/30">
+      <PageSeo
+        title="Pilot Brand Hub | Brand Management Platform"
+        description="Centralize your assets, build stunning scenes, and orchestrate your content strategy from one intelligent, unified hub."
+        image="/og/og-home.jpg"
+        pathname="/"
+      />
       {/* Background ambient light */}
       <div className="absolute top-0 inset-x-0 h-[500px] bg-primary/10 rounded-full blur-[120px] -translate-y-1/2 mx-auto max-w-4xl pointer-events-none" />
 

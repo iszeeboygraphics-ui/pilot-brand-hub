@@ -12,6 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Upload, Save, Palette, X, Check, ChevronsUpDown, Sparkles, Loader2, Type } from 'lucide-react';
 import { toast } from 'sonner';
 import { FeatureIntro } from '@/components/FeatureIntro';
+import { PageSeo } from '@/components/PageSeo';
 
 interface PaletteSuggestion {
   name: string;
@@ -192,6 +193,12 @@ export default function BrandVault() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
+      <PageSeo
+        title="Brand Vault | Pilot Brand Hub"
+        description="Define and centralize your brand identity — colors, fonts, logos, and voice — all in one secure vault."
+        image="/og/og-brand-vault.jpg"
+        pathname="/brand-vault"
+      />
       <div className="animate-fade-in">
         <h1 className="text-2xl font-bold tracking-tight">Brand Vault</h1>
         <p className="text-muted-foreground mt-1">Define your global brand identity</p>
