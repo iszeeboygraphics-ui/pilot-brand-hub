@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { ImageResultEditor } from '@/components/ImageResultEditor';
 import { FeatureIntro } from '@/components/FeatureIntro';
+import { PageSeo } from '@/components/PageSeo';
 
 export default function ThumbnailCreator() {
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
@@ -79,6 +80,12 @@ export default function ThumbnailCreator() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
+      <PageSeo
+        title="Thumbnail Creator | Pilot Brand Hub"
+        description="Design high-impact 16:9 thumbnails that stop the scroll on YouTube, social, and ads — powered by AI."
+        image="/og/og-thumbnail-creator.jpg"
+        pathname="/thumbnail-creator"
+      />
       <div className="animate-fade-in">
         <h1 className="text-2xl font-bold tracking-tight">Thumbnail Creator</h1>
         <p className="text-muted-foreground mt-1">Design eye-catching thumbnails for your content</p>

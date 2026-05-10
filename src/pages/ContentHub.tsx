@@ -6,6 +6,7 @@ import { Upload, Sparkles, Copy, Check, RefreshCw, PenTool, Wand2, Loader2, Imag
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { FeatureIntro } from '@/components/FeatureIntro';
+import { PageSeo } from '@/components/PageSeo';
 import { ImageResultEditor } from '@/components/ImageResultEditor';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -157,6 +158,12 @@ export default function ContentHub() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
+      <PageSeo
+        title="Content Hub | Pilot Brand Hub"
+        description="Your AI marketing engine — turn any product into on-brand social posts, captions, and sales copy in seconds."
+        image="/og/og-content-hub.jpg"
+        pathname="/content-hub"
+      />
       <div className="flex items-center justify-between animate-fade-in">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Content Hub</h1>

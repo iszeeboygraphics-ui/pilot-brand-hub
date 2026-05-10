@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { BrandAssistant } from '@/components/BrandAssistant';
 import { FeatureIntro } from '@/components/FeatureIntro';
+import { PageSeo } from '@/components/PageSeo';
 
 const Dashboard = React.forwardRef<HTMLDivElement>(function Dashboard(_props, ref) {
   const { user } = useAuth();
@@ -46,6 +47,12 @@ const Dashboard = React.forwardRef<HTMLDivElement>(function Dashboard(_props, re
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">
+      <PageSeo
+        title="Dashboard | Pilot Brand Hub"
+        description="Your brand command center. Track activity, monitor brand completion, and jump into your next creative task."
+        image="/og/og-dashboard.jpg"
+        pathname="/dashboard"
+      />
       <div className="animate-fade-in flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">

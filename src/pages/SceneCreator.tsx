@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ImageResultEditor } from '@/components/ImageResultEditor';
 import { FeatureIntro } from '@/components/FeatureIntro';
+import { PageSeo } from '@/components/PageSeo';
 
 const presets = [
   { id: 'office', label: 'Minimalist Office', emoji: '🏢' },
@@ -106,6 +107,12 @@ export default function SceneCreator() {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
+      <PageSeo
+        title="Scene Creator | Pilot Brand Hub"
+        description="Place your products in professional, AI-generated environments — from minimalist studios to lifestyle scenes."
+        image="/og/og-scene-creator.jpg"
+        pathname="/scene-creator"
+      />
       <div className="animate-fade-in">
         <h1 className="text-2xl font-bold tracking-tight">Scene Creator</h1>
         <p className="text-muted-foreground mt-1">Place your products in professional environments using AI</p>
