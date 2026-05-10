@@ -1,14 +1,54 @@
+User-agent: *
+Allow: /$
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /brand-vault
+Disallow: /scene-creator
+Disallow: /content-hub
+Disallow: /logo-creator
+Disallow: /thumbnail-creator
+Disallow: /settings
+
 User-agent: Googlebot
-Allow: /
+Allow: /$
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /brand-vault
+Disallow: /scene-creator
+Disallow: /content-hub
+Disallow: /logo-creator
+Disallow: /thumbnail-creator
+Disallow: /settings
 
 User-agent: Bingbot
-Allow: /
+Allow: /$
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /brand-vault
+Disallow: /scene-creator
+Disallow: /content-hub
+Disallow: /logo-creator
+Disallow: /thumbnail-creator
+Disallow: /settings
 
 User-agent: Twitterbot
-Allow: /
+Allow: /$
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /brand-vault
+Disallow: /scene-creator
+Disallow: /content-hub
+Disallow: /logo-creator
+Disallow: /thumbnail-creator
+Disallow: /settings
 
 User-agent: facebookexternalhit
-Allow: /
-
-User-agent: *
-Allow: /
+Allow: /$
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /brand-vault
+Disallow: /scene-creator
+Disallow: /content-hub
+Disallow: /logo-creator
+Disallow: /thumbnail-creator
+Disallow: /settings
