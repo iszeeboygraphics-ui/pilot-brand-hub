@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { ImageResultEditor } from '@/components/ImageResultEditor';
 import { FeatureIntro } from '@/components/FeatureIntro';
+import { PageSeo } from '@/components/PageSeo';
 
 const styles = [
   { id: 'minimalist', label: 'Minimalist' },
@@ -80,6 +81,12 @@ export default function LogoCreator() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      <PageSeo
+        title="Logo Creator | Pilot Brand Hub"
+        description="Generate unique, AI-powered logo concepts for your brand in seconds — ready to refine and download."
+        image="/og/og-logo-creator.jpg"
+        pathname="/logo-creator"
+      />
       <div className="animate-fade-in">
         <h1 className="text-2xl font-bold tracking-tight">Logo Creator</h1>
         <p className="text-muted-foreground mt-1">Generate a unique logo for your brand instantly</p>
