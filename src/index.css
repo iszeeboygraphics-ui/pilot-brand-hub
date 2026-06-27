@@ -112,4 +112,50 @@
   .glow-primary {
     box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
   }
+
+  /* === Animated background utilities (BrandPilot Neural Dark) === */
+  .bg-neural-grid {
+    background-image:
+      linear-gradient(to right, hsl(var(--primary) / 0.35) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--accent) / 0.25) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+  }
+
+  @keyframes grid-pulse {
+    0%, 100% { opacity: 0.05; transform: scale(1); }
+    50%      { opacity: 0.10; transform: scale(1.015); }
+  }
+  .animate-grid-pulse { animation: grid-pulse 12s ease-in-out infinite; }
+
+  @keyframes orb-drift-1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(60px, 40px) scale(1.08); }
+  }
+  @keyframes orb-drift-2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(-50px, 60px) scale(1.1); }
+  }
+  @keyframes orb-drift-3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(40px, -50px) scale(1.06); }
+  }
+  .animate-orb-drift-1 { animation: orb-drift-1 18s ease-in-out infinite; }
+  .animate-orb-drift-2 { animation: orb-drift-2 22s ease-in-out infinite; }
+  .animate-orb-drift-3 { animation: orb-drift-3 26s ease-in-out infinite; }
+
+  @keyframes node-float {
+    0%, 100% { transform: translateY(0) translateX(0); opacity: 0.35; }
+    50%      { transform: translateY(-18px) translateX(8px); opacity: 0.9; }
+  }
+  .animate-node-float { animation: node-float 16s ease-in-out infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-grid-pulse,
+    .animate-orb-drift-1,
+    .animate-orb-drift-2,
+    .animate-orb-drift-3,
+    .animate-node-float { animation: none; }
+  }
 }
