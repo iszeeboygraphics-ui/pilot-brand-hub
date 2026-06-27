@@ -11,6 +11,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Upload, Save, Palette, X, Check, ChevronsUpDown, Sparkles, Loader2, Type } from 'lucide-react';
 import { toast } from 'sonner';
+import { runWithProgress } from '@/lib/progressToast';
 import { FeatureIntro } from '@/components/FeatureIntro';
 import { PageSeo } from '@/components/PageSeo';
 
@@ -93,16 +94,28 @@ export default function BrandVault() {
     }
     setSuggestingPalette(true);
     try {
-      const { data, error } = await supabase.functions.invoke('suggest-palette', {
-        body: { brandName, industry, brandVoice },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      const data = await runWithProgress(
+        async () => {
+          const { data, error } = await supabase.functions.invoke('suggest-palette', {
+            body: { brandName, industry, brandVoice },
+          });
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+          return data;
+        },
+        {
+          steps: [
+            industry ? `Researching color trends in ${industry}…` : 'Analyzing your brand inputs…',
+            brandVoice ? `Matching colors to a ${brandVoice} voice…` : 'Exploring palette directions…',
+            'Generating 3 on-brand palettes…',
+          ],
+          success: 'Palette suggestions ready!',
+          errorFallback: 'Failed to suggest palettes',
+        },
+      );
       setPaletteSuggestions(data.palettes || []);
-      toast.success('Palette suggestions ready!');
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || 'Failed to suggest palettes');
     } finally {
       setSuggestingPalette(false);
     }
@@ -115,16 +128,28 @@ export default function BrandVault() {
     }
     setSuggestingFonts(true);
     try {
-      const { data, error } = await supabase.functions.invoke('suggest-fonts', {
-        body: { brandName, industry, brandVoice },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      const data = await runWithProgress(
+        async () => {
+          const { data, error } = await supabase.functions.invoke('suggest-fonts', {
+            body: { brandName, industry, brandVoice },
+          });
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+          return data;
+        },
+        {
+          steps: [
+            industry ? `Reviewing typography in ${industry}…` : 'Analyzing your brand inputs…',
+            brandVoice ? `Pairing fonts for a ${brandVoice} tone…` : 'Exploring type pairings…',
+            'Curating heading + body combinations…',
+          ],
+          success: 'Font suggestions ready!',
+          errorFallback: 'Failed to suggest fonts',
+        },
+      );
       setFontSuggestions(data.fonts || []);
-      toast.success('Font suggestions ready!');
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || 'Failed to suggest fonts');
     } finally {
       setSuggestingFonts(false);
     }

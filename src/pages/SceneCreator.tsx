@@ -5,6 +5,7 @@ import { Upload, Download, Wand2, Image as ImageIcon, PenTool } from 'lucide-rea
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { runWithProgress } from '@/lib/progressToast';
 import { ImageResultEditor } from '@/components/ImageResultEditor';
 import { FeatureIntro } from '@/components/FeatureIntro';
 import { PageSeo } from '@/components/PageSeo';
@@ -74,24 +75,40 @@ export default function SceneCreator() {
 
     try {
       const imageBase64 = await fileToBase64(productFile);
-
-      const { data, error } = await supabase.functions.invoke('scene-composite', {
-        body: { 
-          imageBase64, 
-          preset: useCustomPrompt ? 'custom' : selectedPreset,
-          customPrompt: useCustomPrompt ? customPrompt : undefined,
-          refinement: typeof refinementPrompt === 'string' ? refinementPrompt : undefined,
+      const data = await runWithProgress(
+        async () => {
+          const { data, error } = await supabase.functions.invoke('scene-composite', {
+            body: {
+              imageBase64,
+              preset: useCustomPrompt ? 'custom' : selectedPreset,
+              customPrompt: useCustomPrompt ? customPrompt : undefined,
+              refinement: typeof refinementPrompt === 'string' ? refinementPrompt : undefined,
+            },
+          });
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+          if (!data?.image) throw new Error('No image returned');
+          return data;
         },
-      });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
+        {
+          steps: refinementPrompt
+            ? ['Applying your refinement…', 'Re-lighting the scene…', 'Finalizing the composite…']
+            : [
+                'Uploading your product image…',
+                useCustomPrompt
+                  ? `Building scene: "${customPrompt.slice(0, 50)}${customPrompt.length > 50 ? '…' : ''}"`
+                  : `Setting up the ${selectedPreset} environment…`,
+                'Matching lighting and shadows…',
+                'Compositing product into the scene…',
+                'Color-grading the final image…',
+              ],
+          success: 'Scene generated!',
+          errorFallback: 'Failed to generate scene',
+        },
+      );
       setResultImage(data.image);
-      toast.success('Scene generated!');
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || 'Failed to generate scene');
     } finally {
       setProcessing(false);
     }
