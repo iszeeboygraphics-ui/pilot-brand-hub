@@ -132,19 +132,35 @@ export default function ContentHub() {
     setGeneratingCustom(true);
     if (!refinementPrompt) setCustomImage(null);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-thumbnail', {
-        body: {
-          title: refinementPrompt || customPrompt,
-          refinement: refinementPrompt ? refinementPrompt : undefined,
+      const promptText = refinementPrompt || customPrompt;
+      const data = await runWithProgress(
+        async () => {
+          const { data, error } = await supabase.functions.invoke('generate-thumbnail', {
+            body: {
+              title: promptText,
+              refinement: refinementPrompt ? refinementPrompt : undefined,
+            },
+          });
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+          return data;
         },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+        {
+          steps: refinementPrompt
+            ? ['Applying your refinement…', 'Re-rendering the design…', 'Polishing details…']
+            : [
+                `Interpreting "${promptText.slice(0, 50)}${promptText.length > 50 ? '…' : ''}"…`,
+                'Sketching layout options…',
+                'Composing typography and color…',
+                'Rendering your design…',
+              ],
+          success: 'Design generated!',
+          errorFallback: 'Failed to generate design',
+        },
+      );
       setCustomImage(data.image);
-      toast.success('Design generated!');
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || 'Failed to generate design');
     } finally {
       setGeneratingCustom(false);
     }
