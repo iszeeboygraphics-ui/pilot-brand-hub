@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Wand2, Download, Image as ImageIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { runWithProgress } from '@/lib/progressToast';
 import { supabase } from '@/integrations/supabase/client';
 import { ImageResultEditor } from '@/components/ImageResultEditor';
 import { FeatureIntro } from '@/components/FeatureIntro';
@@ -44,27 +45,43 @@ export default function LogoCreator() {
     }
 
     try {
-      const { data, error } = await supabase.functions.invoke('generate-logo', {
-        body: {
-          brandName,
-          style: selectedStyle,
-          primaryColor: profile?.color_1 || null,
-          refinement: typeof refinementPrompt === 'string' ? refinementPrompt : undefined,
+      const styleLabel = styles.find((s) => s.id === selectedStyle)?.label || selectedStyle;
+      const data = await runWithProgress(
+        async () => {
+          const { data, error } = await supabase.functions.invoke('generate-logo', {
+            body: {
+              brandName,
+              style: selectedStyle,
+              primaryColor: profile?.color_1 || null,
+              refinement: typeof refinementPrompt === 'string' ? refinementPrompt : undefined,
+            },
+          });
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+          if (!data?.image) throw new Error('No image returned');
+          return data;
         },
-      });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
-      if (data?.image) {
-        setLogoUrl(data.image);
-        toast.success('Logo generated successfully!');
-      } else {
-        throw new Error('No image returned');
-      }
-    } catch (e: any) {
+        {
+          steps: refinementPrompt
+            ? [
+                `Applying your refinement to ${brandName}'s logo…`,
+                'Adjusting shapes and proportions…',
+                'Polishing the final mark…',
+              ]
+            : [
+                `Analyzing ${brandName} for ${styleLabel} direction…`,
+                'Sketching logo concepts…',
+                profile?.color_1 ? `Applying brand color ${profile.color_1}…` : 'Selecting a balanced palette…',
+                'Refining typography and spacing…',
+                'Rendering the final logo…',
+              ],
+          success: 'Logo generated successfully!',
+          errorFallback: 'Failed to generate logo',
+        },
+      );
+      setLogoUrl(data.image);
+    } catch (e) {
       console.error('Logo generation error:', e);
-      toast.error(e.message || 'Failed to generate logo');
     } finally {
       setGenerating(false);
     }

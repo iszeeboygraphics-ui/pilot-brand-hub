@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Upload, Wand2, Download, Image as ImageIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { runWithProgress } from '@/lib/progressToast';
 import { supabase } from '@/integrations/supabase/client';
 import { ImageResultEditor } from '@/components/ImageResultEditor';
 import { FeatureIntro } from '@/components/FeatureIntro';
@@ -44,26 +45,37 @@ export default function ThumbnailCreator() {
     }
 
     try {
-      const { data, error } = await supabase.functions.invoke('generate-thumbnail', {
-        body: {
-          title,
-          imageBase64: backgroundImage || null,
-          refinement: typeof refinementPrompt === 'string' ? refinementPrompt : undefined,
+      const data = await runWithProgress(
+        async () => {
+          const { data, error } = await supabase.functions.invoke('generate-thumbnail', {
+            body: {
+              title,
+              imageBase64: backgroundImage || null,
+              refinement: typeof refinementPrompt === 'string' ? refinementPrompt : undefined,
+            },
+          });
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+          if (!data?.image) throw new Error('No image returned');
+          return data;
         },
-      });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
-      if (data?.image) {
-        setThumbnailUrl(data.image);
-        toast.success('Thumbnail generated successfully!');
-      } else {
-        throw new Error('No image returned');
-      }
-    } catch (e: any) {
+        {
+          steps: refinementPrompt
+            ? ['Applying your refinement…', 'Recomposing the layout…', 'Polishing final pixels…']
+            : [
+                `Interpreting "${title.slice(0, 40)}${title.length > 40 ? '…' : ''}"…`,
+                backgroundImage ? 'Blending your background image…' : 'Designing the composition…',
+                'Adding bold typography…',
+                'Color-grading for high impact…',
+                'Rendering 16:9 thumbnail…',
+              ],
+          success: 'Thumbnail generated successfully!',
+          errorFallback: 'Failed to generate thumbnail',
+        },
+      );
+      setThumbnailUrl(data.image);
+    } catch (e) {
       console.error('Thumbnail generation error:', e);
-      toast.error(e.message || 'Failed to generate thumbnail');
     } finally {
       setGenerating(false);
     }

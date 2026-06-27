@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Upload, Sparkles, Copy, Check, RefreshCw, PenTool, Wand2, Loader2, ImageIcon, Download } from 'lucide-react';
 import { toast } from 'sonner';
+import { runWithProgress } from '@/lib/progressToast';
 import { supabase } from '@/integrations/supabase/client';
 import { FeatureIntro } from '@/components/FeatureIntro';
 import { PageSeo } from '@/components/PageSeo';
@@ -45,22 +46,33 @@ export default function ContentHub() {
   const handleGenerate = async () => {
     setGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-caption', {
-        body: {
-          brandName: profile?.brand_name,
-          industry: profile?.industry,
-          brandVoice: profile?.brand_voice,
+      const data = await runWithProgress(
+        async () => {
+          const { data, error } = await supabase.functions.invoke('generate-caption', {
+            body: {
+              brandName: profile?.brand_name,
+              industry: profile?.industry,
+              brandVoice: profile?.brand_voice,
+            },
+          });
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+          return data;
         },
-      });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
+        {
+          steps: [
+            profile?.brand_name ? `Channeling ${profile.brand_name}'s voice…` : 'Reading your brand profile…',
+            profile?.brand_voice ? `Writing in a ${profile.brand_voice} tone…` : 'Drafting compelling copy…',
+            'Adding hooks and CTAs…',
+            'Polishing the final caption…',
+          ],
+          success: 'Caption generated!',
+          errorFallback: 'Failed to generate caption',
+        },
+      );
       setCaption(data.caption);
-      toast.success('Caption generated!');
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || 'Failed to generate caption');
     } finally {
       setGenerating(false);
     }
@@ -84,16 +96,29 @@ export default function ContentHub() {
     try {
       const flyerPrompt = `Create a professional, high-quality 1080x1080 square product flyer for ${profile?.brand_name || 'a brand'}. ${profile?.industry ? `Industry: ${profile.industry}.` : ''} ${profile?.brand_voice ? `Brand voice: ${profile.brand_voice}.` : ''} ${profile?.color_1 ? `Use brand colors: ${profile.color_1}, ${profile.color_2 || ''}, ${profile.color_3 || ''}.` : ''} ${caption ? `Include this sales copy in the flyer design: "${caption.slice(0, 300)}"` : 'Create compelling promotional copy for the flyer.'} Make it bold, modern, and ready for social media posting. Include a clear call-to-action. The layout should be clean with strong visual hierarchy.`;
 
-      const { data, error } = await supabase.functions.invoke('generate-thumbnail', {
-        body: { title: flyerPrompt },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      const data = await runWithProgress(
+        async () => {
+          const { data, error } = await supabase.functions.invoke('generate-thumbnail', {
+            body: { title: flyerPrompt },
+          });
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+          return data;
+        },
+        {
+          steps: [
+            'Designing the flyer layout…',
+            profile?.color_1 ? `Applying brand colors (${profile.color_1})…` : 'Selecting a strong palette…',
+            'Composing typography and CTA…',
+            'Rendering the final flyer…',
+          ],
+          success: 'Flyer generated!',
+          errorFallback: 'Failed to generate flyer',
+        },
+      );
       setFlyerImage(data.image);
-      toast.success('Flyer generated!');
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || 'Failed to generate flyer');
     } finally {
       setGeneratingFlyer(false);
     }
