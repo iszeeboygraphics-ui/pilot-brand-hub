@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { PageSeo } from "@/components/PageSeo";
+import { AnimatedBackground } from "@/components/AnimatedBackground";
 
 export default function Index() {
   const { user } = useAuth();
@@ -15,8 +16,9 @@ export default function Index() {
         image="/og/og-home.jpg"
         pathname="/"
       />
-      {/* Background ambient light */}
-      <div className="absolute top-0 inset-x-0 h-[500px] bg-primary/10 rounded-full blur-[120px] -translate-y-1/2 mx-auto max-w-4xl pointer-events-none" />
+      {/* Animated ambient background */}
+      <AnimatedBackground />
+
 
       {/* Navigation */}
       <header className="relative z-10 container mx-auto px-6 py-6 flex items-center justify-between">
